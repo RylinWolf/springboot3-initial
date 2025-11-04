@@ -14,13 +14,24 @@ create table if not exists `user`
     phone           varchar(128) comment '手机',
     email           varchar(255) unique not null comment '邮箱',
     login_date      datetime default current_timestamp comment '最后登录时间',
-    register_date   datetime default current_timestamp comment '注册时间'
+    register_date   datetime default current_timestamp comment '注册时间',
+    is_deleted      tinyint  default 0 comment '逻辑删除'
 ) comment '用户表';
 
 
 create table if not exists `admin`
 (
-    user_id          bigint primary key  not null comment '用户 ID',
+    user_id          bigint primary key comment '用户 ID',
     admin_name       varchar(255) unique not null comment '管理员名称',
-    `authentication` text                not null comment '管理权限'
+    `authentication` text                not null comment '管理权限，列表形式',
+    is_deleted       tinyint default 0 comment '逻辑删除'
 ) comment '管理员表';
+
+create table if not exists `authentication`
+(
+    id            bigint primary key comment '权限 ID',
+    parent_id     bigint comment '父权限 ID',
+    `code`        varchar(255) unique not null comment '权限标识',
+    `description` text                not null comment '描述',
+    index parent_id_idx (parent_id) comment '父权限索引'
+) comment '权限表';
