@@ -1,7 +1,7 @@
 package com.wolfhouse.springboot3initial.mapper;
 
-import com.wolfhouse.springboot3initial.model.domain.UserEntity;
 import com.mybatisflex.core.BaseMapper;
+import com.wolfhouse.springboot3initial.model.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 1.0
  */
 @Mapper
-public interface UserMapper extends BaseMapper<UserEntity> {
+public interface UserMapper extends BaseMapper<User> {
 
 
 }

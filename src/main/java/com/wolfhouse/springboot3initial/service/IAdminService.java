@@ -2,7 +2,7 @@ package com.wolfhouse.springboot3initial.service;
 
 
 import com.mybatisflex.core.service.IService;
-import com.wolfhouse.springboot3initial.model.domain.AdminEntity;
+import com.wolfhouse.springboot3initial.model.domain.Admin;
 
 /**
  * 管理员表 服务层。
@@ -10,6 +10,6 @@ import com.wolfhouse.springboot3initial.model.domain.AdminEntity;
  * @author mybatis-flex-helper automatic generation
  * @since 1.0
  */
-public interface IAdminService extends IService<AdminEntity> {
+public interface IAdminService extends IService<Admin> {
 
 }
