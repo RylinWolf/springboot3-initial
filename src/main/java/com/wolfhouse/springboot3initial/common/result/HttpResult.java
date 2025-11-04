@@ -1,0 +1,106 @@
+package com.wolfhouse.springboot3initial.common.result;
+
+import com.wolfhouse.springboot3initial.util.beanutil.BeanUtil;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.io.Serializable;
+
+/**
+ * @author Rylin Wolf
+ */
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Data
+public class HttpResult<T> implements Serializable {
+    private Boolean success;
+    private String message;
+    private Integer code;
+    private T data;
+
+    public static <T> HttpResult<T> success() {
+        return HttpResult.success(null);
+    }
+
+    public static <T> HttpResult<T> success(T data) {
+        return HttpResult.success(data, null);
+    }
+
+    public static <T> HttpResult<T> success(T data, String msg) {
+        return HttpResult.<T>builder()
+                         .code(HttpCode.SUCCESS.code)
+                         .success(true)
+                         .data(data)
+                         .message(msg)
+                         .build();
+    }
+
+    public static <T> HttpResult<T> failed(HttpCode code, String msg, T data) {
+        if (code == null) {
+            code = HttpCode.UNKNOWN;
+        }
+        return HttpResult.<T>builder()
+                         .success(false)
+                         .code(code.code)
+                         .message(msg)
+                         .data(data)
+                         .build();
+    }
+
+    public static <T> HttpResult<T> failed(HttpCode code, T data) {
+        return failed(code, null, data);
+    }
+
+    public static <T> HttpResult<T> failed(HttpCode code) {
+        return failed(code, null);
+    }
+
+    public static <T> HttpResult<T> failed() {
+        return failed(null, null);
+    }
+
+
+    public static <T> HttpResult<T> failedIfBlank(HttpCode code, String failedMsg, T data) {
+        return BeanUtil.isBlank(data) ? HttpResult.failed(code, failedMsg, data) : HttpResult.success(data);
+    }
+
+    public static <T> ResponseEntity<HttpResult<T>> failedWithStatus(Integer httpStatus,
+                                                                     HttpCode code,
+                                                                     String msg,
+                                                                     T data) {
+        return ResponseEntity.status(httpStatus)
+                             .body(HttpResult.failed(code, msg, data));
+    }
+
+    public static ResponseEntity<HttpResult<?>> failedWithStatus(Integer httpStatus, HttpCode code, String msg) {
+        return ResponseEntity.status(httpStatus)
+                             .body(HttpResult.failed(code, msg, null));
+    }
+
+    public static <T> ResponseEntity<HttpResult<T>> failedIfBlank(Integer httpStatus,
+                                                                  HttpCode code,
+                                                                  String message,
+                                                                  T data) {
+        HttpResult<T> res = HttpResult.failedIfBlank(code, message, data);
+
+        return ResponseEntity.status(res.success ? HttpStatus.OK.value() : httpStatus)
+                             .body(res);
+    }
+
+    public static <T> ResponseEntity<HttpResult<T>> ok(T data, String msg) {
+        return ResponseEntity.ok(HttpResult.success(data, msg));
+    }
+
+    public static <T> HttpResult<T> failedIfBlank(T data) {
+        return failedIfBlank(null, null, data);
+    }
+
+    public static HttpResult<?> onCondition(HttpCode code, String msg, Boolean condition) {
+        return condition ? HttpResult.success() : HttpResult.failed(code, msg);
+    }
+}
