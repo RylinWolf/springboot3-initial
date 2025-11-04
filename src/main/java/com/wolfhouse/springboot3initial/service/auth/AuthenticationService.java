@@ -1,8 +1,8 @@
-package com.wolfhouse.springboot3initial.service;
+package com.wolfhouse.springboot3initial.service.auth;
 
 
 import com.mybatisflex.core.service.IService;
-import com.wolfhouse.springboot3initial.model.domain.Authentication;
+import com.wolfhouse.springboot3initial.model.domain.auth.Authentication;
 
 /**
  * 权限表 服务层。

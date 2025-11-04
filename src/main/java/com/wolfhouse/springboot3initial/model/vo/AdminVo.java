@@ -2,8 +2,8 @@ package com.wolfhouse.springboot3initial.model.vo;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
-import com.wolfhouse.springboot3initial.model.domain.Admin;
-import com.wolfhouse.springboot3initial.model.domain.Authentication;
+import com.wolfhouse.springboot3initial.model.domain.auth.Admin;
+import com.wolfhouse.springboot3initial.model.domain.auth.Authentication;
 import lombok.Data;
 
 import java.util.List;

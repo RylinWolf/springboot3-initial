@@ -1,14 +1,11 @@
-package com.wolfhouse.springboot3initial.model.domain;
+package com.wolfhouse.springboot3initial.model.domain.auth;
 
-import lombok.Data;
-import io.swagger.v3.oas.annotations.media.Schema;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
-
-import java.lang.Long;
-import java.lang.String;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * 权限表 实体类。

@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.model.domain;
+package com.wolfhouse.springboot3initial.model.domain.auth;
 
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;

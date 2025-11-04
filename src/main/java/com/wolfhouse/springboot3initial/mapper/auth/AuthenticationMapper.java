@@ -1,7 +1,7 @@
-package com.wolfhouse.springboot3initial.mapper;
+package com.wolfhouse.springboot3initial.mapper.auth;
 
-import com.wolfhouse.springboot3initial.model.domain.Authentication;
 import com.mybatisflex.core.BaseMapper;
+import com.wolfhouse.springboot3initial.model.domain.auth.Authentication;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
