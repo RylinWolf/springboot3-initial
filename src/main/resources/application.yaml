@@ -1,2 +1,15 @@
 server:
   port: 8999
+
+spring:
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/boot3_initial_db
+    username: root
+    password: 123
+
+  # Redis 配置
+  data:
+    redis:
+      username: default
+      password: 123456
