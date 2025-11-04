@@ -4,6 +4,7 @@ server:
 spring:
   # 数据库配置
   datasource:
+    # TODO 配置自己的数据库
     url: jdbc:mysql://localhost:3306/boot3_initial_db
     username: root
     password: 123
@@ -11,5 +12,30 @@ spring:
   # Redis 配置
   data:
     redis:
+      # TODO 配置自己的 Redis 环境
+      host: localhost
       username: default
       password: 123456
+      port: 6379
+      database: 0
+
+# knife4j 文档配置
+# springdoc-openapi项目配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+
+      # TODO 注意更改包名
+      packages-to-scan: com.wolfhouse.springboot3initial.controller
+# knife4j的增强配置，不需要增强可以不配
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
