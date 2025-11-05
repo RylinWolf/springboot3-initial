@@ -1,8 +1,9 @@
 package com.wolfhouse.springboot3initial.mvc.model.dto.user;
 
+import jakarta.validation.constraints.Email;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 /**
  * @author Rylin Wolf
@@ -27,7 +28,7 @@ public class UserRegisterDto {
     /**
      * 生日
      */
-    private Date birth;
+    private LocalDate birth;
 
     /**
      * 个性标签
@@ -42,6 +43,7 @@ public class UserRegisterDto {
     /**
      * 邮箱
      */
+    @Email
     private String email;
 
     /** 密码 */

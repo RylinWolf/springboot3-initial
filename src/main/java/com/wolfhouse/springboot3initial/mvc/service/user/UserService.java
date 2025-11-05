@@ -30,4 +30,15 @@ public interface UserService extends IService<User> {
      */
     UserVo getVoById(Long id);
 
+
+    /**
+     * 根据用户名生成账号。
+     * 将会在用户名之后拼接一串 6 位整型。
+     * <p>
+     * 示例: test#131222
+     *
+     * @param username 用户名，用于生成唯一的账号
+     * @return 根据提供的用户名生成的账号字符串
+     */
+    String genAccount(String username);
 }

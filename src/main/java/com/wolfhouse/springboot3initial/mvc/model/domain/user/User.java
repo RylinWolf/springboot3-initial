@@ -6,7 +6,8 @@ import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * 用户表 实体类。
@@ -53,7 +54,7 @@ public class User {
      * 生日
      */
     @Column(value = "birth")
-    private Date birth;
+    private LocalDate birth;
 
     /**
      * 个性标签
@@ -77,13 +78,13 @@ public class User {
      * 最后登录时间
      */
     @Column(value = "login_date")
-    private Date loginDate;
+    private LocalDateTime loginDate;
 
     /**
      * 注册时间
      */
     @Column(value = "register_date")
-    private Date registerDate;
+    private LocalDateTime registerDate;
 
     /**
      * 逻辑删除

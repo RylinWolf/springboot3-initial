@@ -8,7 +8,7 @@ import com.mybatisflex.core.keygen.KeyGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 用户认证信息表 实体类。
@@ -48,7 +48,7 @@ public class UserAuth {
      */
     @Schema(description = "禁用时间")
     @Column(value = "banned_time")
-    private Date bannedTime;
+    private LocalDateTime bannedTime;
 
     /**
      * 禁用操作者(用户 ID)
