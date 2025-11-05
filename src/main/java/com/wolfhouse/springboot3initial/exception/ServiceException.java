@@ -1,5 +1,6 @@
 package com.wolfhouse.springboot3initial.exception;
 
+import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import lombok.Getter;
 
 /**
@@ -20,5 +21,15 @@ public class ServiceException extends RuntimeException {
     public ServiceException(Integer code, String message) {
         super(message);
         this.code = code;
+    }
+
+    public ServiceException(HttpCode httpCode) {
+        super(httpCode.message);
+        this.code = httpCode.code;
+    }
+
+    public ServiceException(HttpCode httpCode, String message) {
+        super(message);
+        this.code = httpCode.code;
     }
 }

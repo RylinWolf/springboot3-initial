@@ -67,4 +67,12 @@ public interface UserService extends IService<User> {
      * @return 如果用户存在，返回 true；否则返回 false
      */
     Boolean isUserExist(Long id);
+
+    /**
+     * 检查具有指定账号的用户是否存在。
+     *
+     * @param account 用户的账号，用于唯一标识用户，不可为 null
+     * @return 如果账号对应的用户存在，则返回 true；否则返回 false
+     */
+    Boolean isUserAccountExist(String account);
 }

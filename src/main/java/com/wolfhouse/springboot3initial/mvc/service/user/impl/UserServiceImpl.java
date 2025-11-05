@@ -57,6 +57,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return mapper.paginate(dto.getPageNum(), dto.getPageSize(), wrapper);
     }
 
+    // region 指定条件的用户是否存在
+
     @Override
     public Boolean isUserEmailExist(String email) {
         return exists(QueryWrapper.create()
@@ -68,6 +70,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return exists(QueryWrapper.create()
                                   .eq(User::getId, id, true));
     }
+
+    @Override
+    public Boolean isUserAccountExist(String account) {
+        return exists(QueryWrapper.create()
+                                  .eq(User::getAccount, account, true));
+    }
+    // endregion
 
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class)
@@ -102,7 +111,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setId(auth.getId());
         // 3. 保存用户
         // 生成帐号并注入
-        user.setAccount(genAccount(user.getUsername()));
+        String account = genAccount(user.getUsername());
+        // 查询帐号是否存在，若存在则重新生成，超出最大次数则抛出异常
+        int maxReties = 10;
+        while (isUserAccountExist(account) && maxReties-- > 0) {
+            // 重新生成
+            account = genAccount(user.getUsername());
+        }
+        if (maxReties <= 0) {
+            // 超出最大重试次数
+            throw new ServiceException(HttpCode.PARAM_ERROR, UserConstant.UNAVAILABLE_USERNAME);
+        }
+        user.setAccount(account);
         mapper.insert(user, true);
         // 4. 返回 vo
         return BeanUtil.copyProperties(user, UserVo.class);
