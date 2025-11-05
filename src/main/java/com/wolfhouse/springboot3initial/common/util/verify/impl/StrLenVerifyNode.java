@@ -4,8 +4,8 @@ package com.wolfhouse.springboot3initial.common.util.verify.impl;
  * @author Rylin Wolf
  */
 public class StrLenVerifyNode extends BaseVerifyNode<String> {
-    private Long min;
-    private Long max;
+    protected Long min;
+    protected Long max;
 
     public StrLenVerifyNode() {
         super();
