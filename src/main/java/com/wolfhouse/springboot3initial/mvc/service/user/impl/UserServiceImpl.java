@@ -9,7 +9,10 @@ import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyTool;
+import com.wolfhouse.springboot3initial.common.util.verify.impl.EmptyVerifyNode;
 import com.wolfhouse.springboot3initial.common.util.verify.servicenode.common.ServiceVerifyNode;
 import com.wolfhouse.springboot3initial.common.util.verify.servicenode.user.UserVerifyNode;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
@@ -54,6 +57,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return mapper.paginate(dto.getPageNum(), dto.getPageSize(), wrapper);
     }
 
+    @Override
+    public Boolean isUserEmailExist(String email) {
+        return exists(QueryWrapper.create()
+                                  .eq(User::getEmail, email, true));
+    }
+
+    @Override
+    public Boolean isUserExist(Long id) {
+        return exists(QueryWrapper.create()
+                                  .eq(User::getId, id, true));
+    }
+
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -68,9 +83,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                       // 校验手机号
                       ServiceVerifyNode.phone(dto.getPhone()),
                       // 校验生日
-                      UserVerifyNode.birth(dto.getBirth())
-                      // TODO 校验邮箱是否已存在
-                     )
+                      UserVerifyNode.birth(dto.getBirth()),
+                      // 校验邮箱是否已存在
+                      new EmptyVerifyNode<String>().target(dto.getEmail())
+                                                   .predicate(e -> !this.isUserEmailExist(e))
+                                                   .setCustomException(new VerifyException(UserConstant.EXIST_EMAIL))
+                                                   .setStrategy(VerifyStrategy.WITH_CUSTOM_EXCEPTION))
                   .doVerify();
         // 2. 保存密码，获得密码 ID
         UserAuth auth = new UserAuth();

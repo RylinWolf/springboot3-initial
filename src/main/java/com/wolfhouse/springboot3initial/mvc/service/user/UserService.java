@@ -51,4 +51,20 @@ public interface UserService extends IService<User> {
      * @return 符合查询条件的用户分页对象，包含分页信息及对应的用户数据
      */
     Page<User> queryBy(UserQueryDto dto);
+
+    /**
+     * 检查具有指定电子邮件地址的用户是否存在。
+     *
+     * @param email 用户的电子邮件地址，不可为 null
+     * @return 如果拥有该电子邮件地址的用户存在，返回 true；否则返回 false
+     */
+    Boolean isUserEmailExist(String email);
+
+    /**
+     * 检查具有指定 ID 的用户是否存在。
+     *
+     * @param id 用户的唯一标识符，不可为 null
+     * @return 如果用户存在，返回 true；否则返回 false
+     */
+    Boolean isUserExist(Long id);
 }

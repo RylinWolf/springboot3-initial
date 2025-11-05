@@ -8,4 +8,5 @@ public class UserConstant {
     public static final String ILLEGAL_BIRTH = "生日格式非法";
     public static final String REGISTER_FAILED = "用户注册失败";
     public static final String ILLEGAL_USERNAME = "用户名格式非法";
+    public static final String EXIST_EMAIL = "邮箱已存在";
 }
