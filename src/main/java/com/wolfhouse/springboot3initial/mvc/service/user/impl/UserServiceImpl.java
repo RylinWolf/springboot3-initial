@@ -20,11 +20,13 @@ import com.wolfhouse.springboot3initial.mvc.mapper.user.UserAuthMapper;
 import com.wolfhouse.springboot3initial.mvc.mapper.user.UserMapper;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.UserAuth;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
+import com.wolfhouse.springboot3initial.util.LocalLoginUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -47,12 +49,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     // region 登录相关
 
     @Override
-    public User getLoginUser(HttpServletRequest request) {
-        return (User) request.getSession()
-                             .getAttribute(UserConstant.LOGIN_USER_SESSION_KEY);
-    }
-
-    @Override
     public Boolean login(String certificate, String password, HttpServletRequest request) {
         // 1. 检查参数
         ThrowUtil.throwOnCondition(BeanUtil.isAnyBlank(certificate, password),
@@ -62,9 +58,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return false;
         }
         // 3. 保存至 session
+        User user = getByCertificate(certificate);
+        UserLocalDto localDto = BeanUtil.copyProperties(user, UserLocalDto.class);
         request.getSession()
                .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY,
-                             getByCertificate(certificate));
+                             localDto);
+        // 4. 保存至本地状态存储
+        LocalLoginUtil.setUser(localDto);
         return true;
     }
 
@@ -189,10 +189,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public UserVo update(UserUpdateDto dto) {
         // 1. 获取当前登录用户
-        getLoginUser()
+        UserLocalDto user = LocalLoginUtil.getUser();
         // 2. 构建更新条件
         QueryWrapper wrapper = QueryWrapper.create()
-                                           .from(User.class);
+                                           .from(User.class)
+                                           .eq(User::getId, user.getId());
         // 用户名
         dto.getUsername()
            .ifPresent(u -> {

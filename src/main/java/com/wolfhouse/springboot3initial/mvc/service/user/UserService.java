@@ -20,14 +20,6 @@ public interface UserService extends IService<User> {
     // region 登录相关
 
     /**
-     * 获取当前登录的用户信息。
-     *
-     * @param request 用于获取当前登录用户的 HTTP 请求对象
-     * @return 当前登录的用户对象，如果未登录则返回 null
-     */
-    User getLoginUser(HttpServletRequest request);
-
-    /**
      * 用户登录方法。
      *
      * @param certificate 用户凭证（如电子邮件、手机号码或用户名），用于唯一标识用户
