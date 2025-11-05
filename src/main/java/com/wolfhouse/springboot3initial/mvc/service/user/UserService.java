@@ -6,6 +6,7 @@ import com.mybatisflex.core.service.IService;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 
 /**
@@ -25,13 +26,13 @@ public interface UserService extends IService<User> {
     UserVo register(UserRegisterDto dto);
 
     /**
-     * 根据用户 ID 获取对应的用户视图对象。
+     * 更新用户信息。
+     * 根据提供的用户更新数据，更新用户的相关信息。
      *
-     * @param id 用户 ID，唯一标识一个用户
-     * @return 用户视图对象，包含用户的详细信息；如果用户不存在，则返回 null
+     * @param dto 用户更新的传输对象，包含需要更新的字段值，例如用户名、邮箱等
+     * @return 更新后的用户视图对象，包含用户的详细信息
      */
-    UserVo getVoById(Long id);
-
+    UserVo update(UserUpdateDto dto);
 
     /**
      * 根据用户名生成账号。
@@ -44,6 +45,16 @@ public interface UserService extends IService<User> {
      */
     String genAccount(String username);
 
+    // region 查询用户
+
+    /**
+     * 根据用户 ID 获取对应的用户视图对象。
+     *
+     * @param id 用户 ID，唯一标识一个用户
+     * @return 用户视图对象，包含用户的详细信息；如果用户不存在，则返回 null
+     */
+    UserVo getVoById(Long id);
+
     /**
      * 根据提供的查询条件分页查询用户信息。
      *
@@ -51,6 +62,9 @@ public interface UserService extends IService<User> {
      * @return 符合查询条件的用户分页对象，包含分页信息及对应的用户数据
      */
     Page<User> queryBy(UserQueryDto dto);
+    // endregion
+
+    // region 指定条件的用户是否存在
 
     /**
      * 检查具有指定电子邮件地址的用户是否存在。
@@ -75,4 +89,5 @@ public interface UserService extends IService<User> {
      * @return 如果账号对应的用户存在，则返回 true；否则返回 false
      */
     Boolean isUserAccountExist(String account);
+    // endregion
 }

@@ -22,6 +22,7 @@ import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.UserAuth;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     private final UserAuthMapper userAuthMapper;
     private final PasswordEncoder passwordEncoder;
+
+    // region 查询用户
+
+    @Override
+    public UserVo getVoById(Long id) {
+        return BeanUtil.copyProperties(getById(id), UserVo.class);
+    }
 
     @Override
     public Page<User> queryBy(UserQueryDto dto) {
@@ -56,6 +64,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 2. 根据 page 参数和 wrapper 查询
         return mapper.paginate(dto.getPageNum(), dto.getPageSize(), wrapper);
     }
+    // endregion
 
     // region 指定条件的用户是否存在
 
@@ -111,30 +120,37 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setId(auth.getId());
         // 3. 保存用户
         // 生成帐号并注入
-        String account = genAccount(user.getUsername());
-        // 查询帐号是否存在，若存在则重新生成，超出最大次数则抛出异常
-        int maxReties = 10;
-        while (isUserAccountExist(account) && maxReties-- > 0) {
-            // 重新生成
-            account = genAccount(user.getUsername());
-        }
-        if (maxReties <= 0) {
-            // 超出最大重试次数
-            throw new ServiceException(HttpCode.PARAM_ERROR, UserConstant.UNAVAILABLE_USERNAME);
-        }
-        user.setAccount(account);
+        user.setAccount(genAccount(dto.getUsername()));
         mapper.insert(user, true);
         // 4. 返回 vo
         return BeanUtil.copyProperties(user, UserVo.class);
     }
 
     @Override
-    public UserVo getVoById(Long id) {
+    public UserVo update(UserUpdateDto dto) {
+        QueryWrapper wrapper = QueryWrapper.create()
+                                           .from(User.class);
+        // 用户名
+        dto.getUsername()
+           .ifPresent(u -> wrapper.eq(User::getUsername, u));
+
+
         return null;
     }
 
     @Override
     public String genAccount(String username) {
-        return "%s#%s".formatted(username, RandomUtil.randomInt(100000, 1000000));
+        String account = "%s#%s".formatted(username, RandomUtil.randomInt(100000, 1000000));
+        // 查询帐号是否存在，若存在则重新生成，超出最大次数则抛出异常
+        int maxReties = 10;
+        while (isUserAccountExist(account) && maxReties-- > 0) {
+            // 重新生成
+            account = "%s#%s".formatted(username, RandomUtil.randomInt(100000, 1000000));
+        }
+        if (maxReties <= 0) {
+            // 超出最大重试次数
+            throw new ServiceException(HttpCode.PARAM_ERROR, UserConstant.UNAVAILABLE_USERNAME);
+        }
+        return account;
     }
 }

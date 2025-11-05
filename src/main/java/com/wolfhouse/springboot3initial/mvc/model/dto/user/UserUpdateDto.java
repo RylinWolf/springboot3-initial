@@ -2,6 +2,7 @@ package com.wolfhouse.springboot3initial.mvc.model.dto.user;
 
 import jakarta.validation.constraints.Email;
 import lombok.Data;
+import org.openapitools.jackson.nullable.JsonNullable;
 
 import java.time.LocalDate;
 
@@ -13,36 +14,36 @@ public class UserUpdateDto {
     /**
      * 用户名称
      */
-    private String username;
+    private JsonNullable<String> username;
 
     /**
      * 头像
      */
-    private String avatar;
+    private JsonNullable<String> avatar;
 
     /**
      * 性别
      */
-    private Integer gender;
+    private JsonNullable<Integer> gender;
 
     /**
      * 生日
      */
-    private LocalDate birth;
+    private JsonNullable<LocalDate> birth;
 
     /**
      * 个性标签
      */
-    private String personalStatus;
+    private JsonNullable<String> personalStatus;
 
     /**
      * 手机
      */
-    private String phone;
+    private JsonNullable<String> phone;
 
     /**
      * 邮箱
      */
     @Email
-    private String email;
+    private JsonNullable<String> email;
 }
