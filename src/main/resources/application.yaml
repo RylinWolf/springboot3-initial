@@ -21,6 +21,14 @@ spring:
       port: 6379
       database: 0
 
+# 自定义配置
+custom:
+  # 自定义日期格式配置
+  dateformat:
+    date: yyyy-MM-dd
+    datetime: yyyy-MM-dd HH:mm:ss
+    time: HH:mm:ss
+
 # knife4j 文档配置
 # springdoc-openapi项目配置
 springdoc:
