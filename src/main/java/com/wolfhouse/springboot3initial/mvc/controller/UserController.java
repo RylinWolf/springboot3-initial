@@ -1,11 +1,11 @@
 package com.wolfhouse.springboot3initial.mvc.controller;
 
-import com.mybatisflex.core.paginate.Page;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
-import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +18,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@Tag(name = "用户接口")
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/register")
+    @PostMapping
+    @Operation(description = "用户注册")
     public HttpResult<UserVo> register(@RequestBody UserRegisterDto dto) {
         // 1. 调用业务方法
         UserVo vo = userService.register(dto);
@@ -35,7 +37,8 @@ public class UserController {
      * @param id 主键
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
-    @DeleteMapping("/remove/{id}")
+    @DeleteMapping("/{id}")
+    @Operation(description = "用户删除")
     public boolean remove(@PathVariable Long id) {
         return userService.removeById(id);
     }
@@ -47,20 +50,10 @@ public class UserController {
      * @param id user主键
      * @return 用户表详情
      */
-    @GetMapping("/getInfo/{id}")
+    @GetMapping("/{id}")
+    @Operation(description = "按 ID 获取用户 Vo")
     public UserVo getInfo(@PathVariable Long id) {
         return userService.getVoById(id);
     }
 
-
-    /**
-     * 分页查询用户表
-     *
-     * @param page 分页对象
-     * @return 分页对象
-     */
-    @GetMapping("/page")
-    public Page<User> page(Page<User> page) {
-        return userService.page(page);
-    }
 }
