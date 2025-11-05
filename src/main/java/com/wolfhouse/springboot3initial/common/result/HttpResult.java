@@ -1,6 +1,6 @@
 package com.wolfhouse.springboot3initial.common.result;
 
-import com.wolfhouse.springboot3initial.util.beanutil.BeanUtil;
+import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
