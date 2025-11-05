@@ -11,8 +11,9 @@ public enum HttpCode {
     /** 成功 */
     SUCCESS(HttpStatus.OK.value(), ""),
     FORBIDDEN(HttpStatus.FORBIDDEN.value(), "访问被拒绝"),
-    UNKNOWN(50099, "未知错误");
-    
+    UNKNOWN(50099, "未知错误"),
+    SQL_ERROR(50011, "SQL 错误");
+
     public final int code;
     public final String message;
 

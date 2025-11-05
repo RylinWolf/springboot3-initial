@@ -1,10 +1,7 @@
 package com.wolfhouse.springboot3initial.common.result;
 
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -40,10 +37,7 @@ public class HttpResult<T> implements Serializable {
                          .build();
     }
 
-    public static <T> HttpResult<T> failed(HttpCode code, String msg, T data) {
-        if (code == null) {
-            code = HttpCode.UNKNOWN;
-        }
+    public static <T> HttpResult<T> failed(@NonNull HttpCode code, String msg, T data) {
         return HttpResult.<T>builder()
                          .success(false)
                          .code(code.code)
@@ -52,8 +46,8 @@ public class HttpResult<T> implements Serializable {
                          .build();
     }
 
-    public static <T> HttpResult<T> failed(HttpCode code, T data) {
-        return failed(code, null, data);
+    public static <T> HttpResult<T> failed(@NonNull HttpCode code, T data) {
+        return failed(code, code.message, data);
     }
 
     public static <T> HttpResult<T> failed(HttpCode code) {
@@ -61,7 +55,7 @@ public class HttpResult<T> implements Serializable {
     }
 
     public static <T> HttpResult<T> failed() {
-        return failed(null, null);
+        return failed(HttpCode.UNKNOWN, null);
     }
 
 
@@ -80,6 +74,11 @@ public class HttpResult<T> implements Serializable {
     public static ResponseEntity<HttpResult<?>> failedWithStatus(Integer httpStatus, HttpCode code, String msg) {
         return ResponseEntity.status(httpStatus)
                              .body(HttpResult.failed(code, msg, null));
+    }
+
+    public static ResponseEntity<HttpResult<?>> failedWithStatus(Integer httpStatus, HttpCode code) {
+        return ResponseEntity.status(httpStatus)
+                             .body(HttpResult.failed(code));
     }
 
     public static <T> ResponseEntity<HttpResult<T>> failedIfBlank(Integer httpStatus,
@@ -101,6 +100,10 @@ public class HttpResult<T> implements Serializable {
     }
 
     public static HttpResult<?> onCondition(HttpCode code, String msg, Boolean condition) {
-        return condition ? HttpResult.success() : HttpResult.failed(code, msg);
+        return condition ? HttpResult.success() : HttpResult.failed(code, msg, null);
+    }
+
+    public static HttpResult<?> onCondition(HttpCode code, Boolean condition) {
+        return condition ? HttpResult.success() : HttpResult.failed(code);
     }
 }
