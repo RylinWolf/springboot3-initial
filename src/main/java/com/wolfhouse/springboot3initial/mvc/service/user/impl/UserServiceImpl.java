@@ -189,7 +189,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public UserVo update(UserUpdateDto dto) {
         // 1. 获取当前登录用户
-
+        getLoginUser()
         // 2. 构建更新条件
         QueryWrapper wrapper = QueryWrapper.create()
                                            .from(User.class);
