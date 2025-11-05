@@ -8,6 +8,7 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 用户表 服务层。
@@ -16,6 +17,45 @@ import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
  * @since 1.0
  */
 public interface UserService extends IService<User> {
+    // region 登录相关
+
+    /**
+     * 获取当前登录的用户信息。
+     *
+     * @param request 用于获取当前登录用户的 HTTP 请求对象
+     * @return 当前登录的用户对象，如果未登录则返回 null
+     */
+    User getLoginUser(HttpServletRequest request);
+
+    /**
+     * 用户登录方法。
+     *
+     * @param certificate 用户凭证（如电子邮件、手机号码或用户名），用于唯一标识用户
+     * @param password    用户的登录密码，用于身份验证
+     * @param request     用于获取当前登录用户的 HTTP 请求对象
+     * @return 如果登录成功返回 true，否则返回 false
+     */
+    Boolean login(String certificate, String password, HttpServletRequest request);
+
+    /**
+     * 用户登出方法。
+     * <p>
+     * 此方法用于注销当前登录的用户，清除其会话信息，并使其无法再访问需要身份验证的资源。
+     *
+     * @param request 用于获取当前登录用户的 HTTP 请求对象
+     */
+    void logout(HttpServletRequest request);
+
+    /**
+     * 验证用户凭证和密码的正确性。
+     *
+     * @param certificate 用户凭证（如电子邮件、手机号码或用户名），用于唯一标识用户
+     * @param password    用户的登录密码，用于身份验证
+     * @return 如果验证成功返回 true，否则返回 false
+     */
+    Boolean verify(String certificate, String password);
+    // endregion
+
     /**
      * 创建用户。根据用户名称自动生成帐号并注入。
      * 返回创建后的用户对象。
@@ -46,6 +86,14 @@ public interface UserService extends IService<User> {
     String genAccount(String username);
 
     // region 查询用户
+
+    /**
+     * 根据用户凭证获取用户信息。
+     *
+     * @param certificate 用户凭证（如电子邮件、手机号码或用户名），用于唯一标识用户
+     * @return 对应的用户对象；如果用户不存在，则返回 null
+     */
+    User getByCertificate(String certificate);
 
     /**
      * 根据用户 ID 获取对应的用户视图对象。

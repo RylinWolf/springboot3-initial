@@ -25,11 +25,14 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserTableDef.USER;
 
 /**
  * @author Rylin Wolf
@@ -40,7 +43,64 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final UserAuthMapper userAuthMapper;
     private final PasswordEncoder passwordEncoder;
 
+
+    // region 登录相关
+
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        return (User) request.getSession()
+                             .getAttribute(UserConstant.LOGIN_USER_SESSION_KEY);
+    }
+
+    @Override
+    public Boolean login(String certificate, String password, HttpServletRequest request) {
+        // 1. 检查参数
+        ThrowUtil.throwOnCondition(BeanUtil.isAnyBlank(certificate, password),
+                                   HttpCode.PARAM_ERROR.message);
+        // 2. 验证用户信息
+        if (!verify(certificate, password)) {
+            return false;
+        }
+        // 3. 保存至 session
+        request.getSession()
+               .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY,
+                             getByCertificate(certificate));
+        return true;
+    }
+
+    @Override
+    public void logout(HttpServletRequest request) {
+        request.getSession()
+               .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
+    }
+
+    @Override
+    public Boolean verify(String certificate, String password) {
+        // 1. 获取用户
+        User user = getByCertificate(certificate);
+        if (user == null) {
+            return false;
+        }
+        // 2. 获取用户验证信息
+        UserAuth auth = userAuthMapper.selectOneById(user.getId());
+        // 3. 比对验证信息
+        return passwordEncoder.matches(password, auth.getPasscode());
+    }
+
+    // endregion
+
     // region 查询用户
+
+
+    @Override
+    public User getByCertificate(String certificate) {
+        return mapper.selectOneByQuery(QueryWrapper.create()
+                                                   .from(User.class)
+                                                   // 根据帐号查询
+                                                   .where(USER.ACCOUNT.eq(certificate))
+                                                   // 根据邮箱查询
+                                                   .or(USER.EMAIL.eq(certificate)));
+    }
 
     @Override
     public UserVo getVoById(Long id) {
@@ -128,11 +188,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public UserVo update(UserUpdateDto dto) {
+        // 1. 获取当前登录用户
+
+        // 2. 构建更新条件
         QueryWrapper wrapper = QueryWrapper.create()
                                            .from(User.class);
         // 用户名
         dto.getUsername()
-           .ifPresent(u -> wrapper.eq(User::getUsername, u));
+           .ifPresent(u -> {
+               genAccount(u);
+               wrapper.eq(User::getUsername, u);
+           });
+        // 3. 执行更新
 
 
         return null;
@@ -153,4 +220,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return account;
     }
+
+
 }
