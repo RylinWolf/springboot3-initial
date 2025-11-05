@@ -28,7 +28,7 @@ public class ObjectMapperConfig {
     @Bean
     public JacksonObjectMapper jsonNullableMapper() {
         JacksonObjectMapper om = defaultMapper(dateFormatConfig);
-//        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//        om.setSerializationInclusion(JsonInclude.Include.NON_NULL)
         om.registerModule(new JsonNullableModule());
         return om;
     }
