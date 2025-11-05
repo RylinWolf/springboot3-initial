@@ -18,6 +18,16 @@ create table if not exists `user`
     is_deleted      tinyint  default 0 comment '逻辑删除'
 ) comment '用户表';
 
+create table if not exists `user_auth`
+(
+    id          bigint primary key comment '用户认证 ID',
+    passcode    varchar(512) not null comment '密码密文',
+    is_banned   tinyint default 0 comment '是否禁用',
+    banned_time datetime comment '禁用时间',
+    banned_from bigint comment '禁用操作者(用户 ID)',
+    banned_msg  text comment '禁用备注'
+) comment '用户认证信息表';
+
 
 create table if not exists `admin`
 (
