@@ -10,6 +10,5 @@ public enum VerifyStrategy {
     WITH_EXCEPTION,
     /** 若验证失败，则抛出自定义异常信息 */
     WITH_CUSTOM_EXCEPTION,
-
-
+    
 }

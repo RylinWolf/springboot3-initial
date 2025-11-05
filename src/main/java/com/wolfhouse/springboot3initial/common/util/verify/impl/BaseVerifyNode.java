@@ -1,9 +1,10 @@
 package com.wolfhouse.springboot3initial.common.util.verify.impl;
 
-import com.wolfhouse.wolfhouseblog.common.utils.verify.VerifyConstant;
-import com.wolfhouse.wolfhouseblog.common.utils.verify.VerifyException;
-import com.wolfhouse.wolfhouseblog.common.utils.verify.VerifyNode;
-import com.wolfhouse.wolfhouseblog.common.utils.verify.VerifyStrategy;
+
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyConstant;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyNode;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 
 import java.util.function.Predicate;
 

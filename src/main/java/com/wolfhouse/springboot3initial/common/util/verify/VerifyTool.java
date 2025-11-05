@@ -1,14 +1,7 @@
 package com.wolfhouse.springboot3initial.common.util.verify;
 
-import com.wolfhouse.wolfhouseblog.common.utils.ServiceUtil;
-import com.wolfhouse.wolfhouseblog.common.utils.verify.impl.BaseVerifyChain;
-import com.wolfhouse.wolfhouseblog.common.utils.verify.impl.nodes.commons.LoginVerifyNode;
-import com.wolfhouse.wolfhouseblog.common.utils.verify.impl.nodes.user.UserIdVerifyNode;
-import com.wolfhouse.wolfhouseblog.service.mediator.ServiceAuthMediator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.wolfhouse.springboot3initial.common.util.verify.impl.BaseVerifyChain;
 
 /**
  * @author linexsong
@@ -41,26 +34,5 @@ public class VerifyTool {
             }
         }
         return of(nodes);
-    }
-
-    /**
-     * 根据 VerifyNode 数组构建验证链。
-     * 自动添加登陆验证节点。
-     *
-     * @param nodes 验证节点数组
-     * @return 验证链
-     */
-    public static BaseVerifyChain ofLogin(VerifyNode<?>... nodes) {
-        List<VerifyNode<?>> nodeList = new ArrayList<>(Arrays.stream(nodes)
-                                                             .toList());
-        nodeList.addFirst(new LoginVerifyNode());
-        return of(nodeList.toArray(new VerifyNode[0]));
-    }
-
-    public static BaseVerifyChain ofLoginExist(ServiceAuthMediator mediator, VerifyNode<?>... nodes) {
-        List<VerifyNode<?>> nodeList = new ArrayList<>(Arrays.stream(nodes)
-                                                             .toList());
-        nodeList.addFirst(new UserIdVerifyNode(mediator, ServiceUtil.loginUserOrE()));
-        return of(nodeList.toArray(new VerifyNode[0]));
     }
 }
