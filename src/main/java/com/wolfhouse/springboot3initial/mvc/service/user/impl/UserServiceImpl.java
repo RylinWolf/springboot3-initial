@@ -1,6 +1,9 @@
 package com.wolfhouse.springboot3initial.mvc.service.user.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryChain;
+import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
@@ -14,6 +17,7 @@ import com.wolfhouse.springboot3initial.mvc.mapper.user.UserAuthMapper;
 import com.wolfhouse.springboot3initial.mvc.mapper.user.UserMapper;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.UserAuth;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
@@ -32,6 +36,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final UserAuthMapper userAuthMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Override
+    public Page<User> queryBy(UserQueryDto dto) {
+        QueryWrapper wrapper = QueryChain.create()
+                                         .from(User.class);
+        // 1. 根据 dto 传递条件构建查询 wrapper
+        // 用户名
+        dto.getUsername()
+           .ifPresent(u -> wrapper.like(User::getUsername, u, true));
+        // 帐号
+        dto.getAccount()
+           .ifPresent(a -> wrapper.like(User::getAccount, a, true));
+        // 邮箱
+        dto.getEmail()
+           .ifPresent(e -> wrapper.eq(User::getEmail, e, true));
+        // 2. 根据 page 参数和 wrapper 查询
+        return mapper.paginate(dto.getPageNum(), dto.getPageSize(), wrapper);
+    }
+
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -47,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                       ServiceVerifyNode.phone(dto.getPhone()),
                       // 校验生日
                       UserVerifyNode.birth(dto.getBirth())
-                      // TODO 校验邮箱
+                      // TODO 校验邮箱是否已存在
                      )
                   .doVerify();
         // 2. 保存密码，获得密码 ID

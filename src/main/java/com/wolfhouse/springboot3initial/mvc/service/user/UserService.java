@@ -1,8 +1,10 @@
 package com.wolfhouse.springboot3initial.mvc.service.user;
 
 
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 
@@ -41,4 +43,12 @@ public interface UserService extends IService<User> {
      * @return 根据提供的用户名生成的账号字符串
      */
     String genAccount(String username);
+
+    /**
+     * 根据提供的查询条件分页查询用户信息。
+     *
+     * @param dto 用户查询条件的传输对象，包含用户名、邮箱、账号等查询字段和分页信息
+     * @return 符合查询条件的用户分页对象，包含分页信息及对应的用户数据
+     */
+    Page<User> queryBy(UserQueryDto dto);
 }
