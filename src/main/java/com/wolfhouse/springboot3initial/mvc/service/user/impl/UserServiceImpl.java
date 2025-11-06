@@ -7,6 +7,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
+import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
@@ -204,15 +205,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserVo update(UserUpdateDto dto) throws Exception {
         // 1. 获取当前登录用户
         UserLocalDto user = LocalLoginUtil.getUser();
+        // 未登录，不允许操作
+        ThrowUtil.throwIfBlank(user,
+                               HttpCode.UN_AUTHORIZED.code,
+                               HttpCode.UN_AUTHORIZED.message,
+                               ServiceException.class);
         // 2. 构建更新条件
         // 获取字段
         JsonNullable<String> username = dto.getUsername();
         JsonNullable<String> avatar = dto.getAvatar();
-        JsonNullable<Integer> gender = dto.getGender();
+        JsonNullable<GenderEnum> gender = dto.getGender();
         JsonNullable<LocalDate> birth = dto.getBirth();
         JsonNullable<String> personalStatus = dto.getPersonalStatus();
         JsonNullable<String> phone = dto.getPhone();
         JsonNullable<String> email = dto.getEmail();
+
+        // 邮箱和用户名若与之前一样，则不修改
+        if (user.getUsername()
+                .equals(username.get())) {
+            username = JsonNullable.undefined();
+        }
+        if (user.getEmail()
+                .equals(email.get())) {
+            email = JsonNullable.undefined();
+        }
 
         // 校验字段
         // TODO 图片校验
@@ -239,10 +255,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
            .ifPresent(u -> {
                // 同步更新帐号
                chain.set(User::getAccount, genAccount(u));
-               chain.eq(User::getUsername, u);
+               chain.set(User::getUsername, u);
            });
         // 邮箱
-        email.ifPresent(e -> chain.eq(User::getEmail, e));
+        email.ifPresent(e -> chain.set(User::getEmail, e));
         // 头像 可以为空
         avatar.ifPresent(a -> chain.set(User::getAvatar, a, true));
         // 生日 可以为空
@@ -250,7 +266,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 性别 可以为空
         gender.ifPresent(b -> chain.set(User::getGender, b, true));
         // 手机号 可以为空
-        phone.ifPresent(p -> chain.eq(User::getPhone, p, true));
+        phone.ifPresent(p -> chain.set(User::getPhone, p, true));
         // 个性签名 可以为空
         personalStatus.ifPresent(s -> chain.set(User::getPersonalStatus, s, true));
 

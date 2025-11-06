@@ -1,8 +1,10 @@
 package com.wolfhouse.springboot3initial.mvc.model.vo;
 
+import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author Rylin Wolf
@@ -32,12 +34,12 @@ public class UserVo {
     /**
      * 性别
      */
-    private Integer gender;
+    private GenderEnum gender;
 
     /**
      * 生日
      */
-    private Date birth;
+    private LocalDate birth;
 
     /**
      * 个性标签
@@ -57,10 +59,10 @@ public class UserVo {
     /**
      * 最后登录时间
      */
-    private Date loginDate;
+    private LocalDateTime loginDate;
 
     /**
      * 注册时间
      */
-    private Date registerDate;
+    private LocalDateTime registerDate;
 }

@@ -4,6 +4,7 @@ import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
+import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -48,7 +49,7 @@ public class User {
      * 性别
      */
     @Column(value = "gender")
-    private Integer gender;
+    private GenderEnum gender;
 
     /**
      * 生日
