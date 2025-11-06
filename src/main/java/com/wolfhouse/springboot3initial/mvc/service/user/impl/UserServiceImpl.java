@@ -4,18 +4,18 @@ import cn.hutool.core.util.RandomUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
-import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
-import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyTool;
-import com.wolfhouse.springboot3initial.common.util.verify.impl.EmptyVerifyNode;
+import com.wolfhouse.springboot3initial.common.util.verify.servicenode.common.PhoneVerifyNode;
 import com.wolfhouse.springboot3initial.common.util.verify.servicenode.common.ServiceVerifyNode;
 import com.wolfhouse.springboot3initial.common.util.verify.servicenode.user.UserVerifyNode;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
+import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.mapper.user.UserAuthMapper;
 import com.wolfhouse.springboot3initial.mvc.mapper.user.UserMapper;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
@@ -27,12 +27,16 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import com.wolfhouse.springboot3initial.util.LocalLoginUtil;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserTableDef.USER;
 
@@ -44,7 +48,21 @@ import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserT
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     private final UserAuthMapper userAuthMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserAdminAuthMediator mediator;
 
+    // region 初始化
+
+    /**
+     * 初始化方法。
+     * 该方法在对象构造完成后调用，用于完成必要的初始化操作。
+     * 在此方法中，将当前服务注册到中介者（mediator）中，以便与其他服务进行交互。
+     * 此方法通过 @PostConstruct 注解标识，确保在依赖注入完成后执行。
+     */
+    @PostConstruct
+    public void init() {
+        this.mediator.registerUserService(this);
+    }
+    // endregion
 
     // region 登录相关
 
@@ -161,12 +179,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                       // 校验手机号
                       ServiceVerifyNode.phone(dto.getPhone()),
                       // 校验生日
-                      UserVerifyNode.birth(dto.getBirth()),
-                      // 校验邮箱是否已存在
-                      new EmptyVerifyNode<String>().target(dto.getEmail())
-                                                   .predicate(e -> !this.isUserEmailExist(e))
-                                                   .setCustomException(new VerifyException(UserConstant.EXIST_EMAIL))
-                                                   .setStrategy(VerifyStrategy.WITH_CUSTOM_EXCEPTION))
+                      UserVerifyNode.birth(dto.getBirth()))
                   .doVerify();
         // 2. 保存密码，获得密码 ID
         UserAuth auth = new UserAuth();
@@ -187,23 +200,68 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public UserVo update(UserUpdateDto dto) {
+    @Transactional(rollbackFor = Exception.class)
+    public UserVo update(UserUpdateDto dto) throws Exception {
         // 1. 获取当前登录用户
         UserLocalDto user = LocalLoginUtil.getUser();
         // 2. 构建更新条件
-        QueryWrapper wrapper = QueryWrapper.create()
-                                           .from(User.class)
-                                           .eq(User::getId, user.getId());
+        // 获取字段
+        JsonNullable<String> username = dto.getUsername();
+        JsonNullable<String> avatar = dto.getAvatar();
+        JsonNullable<Integer> gender = dto.getGender();
+        JsonNullable<LocalDate> birth = dto.getBirth();
+        JsonNullable<String> personalStatus = dto.getPersonalStatus();
+        JsonNullable<String> phone = dto.getPhone();
+        JsonNullable<String> email = dto.getEmail();
+
+        // 校验字段
+        // TODO 图片校验
+        VerifyTool.of(
+                      // 生日
+                      UserVerifyNode.birth(birth.orElse(null)),
+                      // 用户名
+                      UserVerifyNode.username(username.orElse(null))
+                                    .allowNull(true),
+                      // 个性签名
+                      UserVerifyNode.status(personalStatus.orElse(null)),
+                      // 性别
+                      UserVerifyNode.gender(gender.orElse(null)),
+                      // 邮箱
+                      UserVerifyNode.email(mediator, email.orElse(null))
+                                    .allowNull(true),
+                      // 手机号
+                      new PhoneVerifyNode(phone.orElse(null)))
+                  .doVerify();
+        UpdateChain<User> chain = new UpdateChain<>(mapper);
+        chain.eq(User::getId, user.getId());
         // 用户名
         dto.getUsername()
            .ifPresent(u -> {
-               genAccount(u);
-               wrapper.eq(User::getUsername, u);
+               // 同步更新帐号
+               chain.set(User::getAccount, genAccount(u));
+               chain.eq(User::getUsername, u);
            });
+        // 邮箱
+        email.ifPresent(e -> chain.eq(User::getEmail, e));
+        // 头像 可以为空
+        avatar.ifPresent(a -> chain.set(User::getAvatar, a, true));
+        // 生日 可以为空
+        birth.ifPresent(b -> chain.set(User::getBirth, b, true));
+        // 性别 可以为空
+        gender.ifPresent(b -> chain.set(User::getGender, b, true));
+        // 手机号 可以为空
+        phone.ifPresent(p -> chain.eq(User::getPhone, p, true));
+        // 个性签名 可以为空
+        personalStatus.ifPresent(s -> chain.set(User::getPersonalStatus, s, true));
+
         // 3. 执行更新
-
-
-        return null;
+        // 更新失败则抛出异常，回滚
+        ThrowUtil.throwOnCondition(!chain.update(),
+                                   HttpCode.SQL_ERROR.code,
+                                   HttpCode.SQL_ERROR.message,
+                                   ServiceException.class);
+        // 4. 返回 Vo
+        return getVoById(user.getId());
     }
 
     @Override
