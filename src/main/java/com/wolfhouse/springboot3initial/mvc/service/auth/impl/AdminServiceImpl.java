@@ -3,7 +3,7 @@ package com.wolfhouse.springboot3initial.mvc.service.auth.impl;
 
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import com.wolfhouse.springboot3initial.common.constant.AdminConstant;
+import com.wolfhouse.springboot3initial.common.constant.AuthenticationConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
@@ -80,7 +80,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
                       // 管理员名称是否已存在
                       AdminVerifyNode.nameExist(mediator, dto.getAdminName())
                                      .exception(new ServiceException(HttpCode.PARAM_ERROR.code,
-                                                                     AdminConstant.ADMIN_NAME_EXIST))
+                                                                     AuthenticationConstant.ADMIN_NAME_EXIST))
                       // TODO 权限是否存在
                      )
                   .doVerify();

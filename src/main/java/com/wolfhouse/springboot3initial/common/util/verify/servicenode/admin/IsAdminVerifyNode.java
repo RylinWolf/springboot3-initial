@@ -1,6 +1,6 @@
 package com.wolfhouse.springboot3initial.common.util.verify.servicenode.admin;
 
-import com.wolfhouse.springboot3initial.common.constant.AdminConstant;
+import com.wolfhouse.springboot3initial.common.constant.AuthenticationConstant;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.BaseVerifyNode;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
@@ -13,7 +13,7 @@ public class IsAdminVerifyNode extends BaseVerifyNode<Long> {
 
     {
         this.allowNull = false;
-        this.customException = new ServiceException(AdminConstant.NOT_ADMIN);
+        this.customException = new ServiceException(AuthenticationConstant.NOT_ADMIN);
     }
 
     public IsAdminVerifyNode(UserAdminAuthMediator mediator) {

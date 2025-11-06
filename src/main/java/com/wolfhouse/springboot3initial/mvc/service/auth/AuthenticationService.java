@@ -7,6 +7,9 @@ import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AuthenticationDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AuthenticationQueryDto;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * 权限表 服务层。
  *
@@ -32,6 +35,14 @@ public interface AuthenticationService extends IService<Authentication> {
      * @return 返回包含权限信息的分页结果对象。
      */
     Page<Authentication> queryBy(AuthenticationQueryDto dto);
+
+    /**
+     * 根据指定的权限 ID 集合批量查询权限信息。
+     *
+     * @param ids 权限 ID 集合，用于标识需要查询的权限。
+     * @return 返回包含对应权限信息的列表。如果未找到对应的权限信息，可能返回空列表。
+     */
+    List<Authentication> getByIds(Collection<Long> ids);
 
     /**
      * 检查指定权限是否存在。

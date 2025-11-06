@@ -4,12 +4,18 @@ package com.wolfhouse.springboot3initial.mvc.service.auth.impl;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.wolfhouse.springboot3initial.common.constant.AuthenticationConstant;
+import com.wolfhouse.springboot3initial.common.result.HttpCode;
+import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
 import com.wolfhouse.springboot3initial.mvc.mapper.auth.AuthenticationMapper;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AuthenticationDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AuthenticationQueryDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 权限表 服务层实现。
@@ -21,6 +27,12 @@ import org.springframework.stereotype.Service;
 public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper, Authentication> implements AuthenticationService {
 
     // region 查询
+
+
+    @Override
+    public List<Authentication> getByIds(Collection<Long> ids) {
+        return listByIds(ids);
+    }
 
     @Override
     public Page<Authentication> queryBy(AuthenticationQueryDto dto) {
@@ -65,6 +77,16 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
 
     @Override
     public Authentication addAuth(AuthenticationDto dto) throws Exception {
+        // 0. 检查权限
+        // TODO 检查当前权限是否可添加权限
+        // 1. 参数校验
+        ThrowUtil.throwOnCondition(isAuthCodeExist(dto.getCode()),
+                                   HttpCode.PARAM_ERROR.code,
+                                   AuthenticationConstant.AUTH_CODE_EXIST);
+        // 2. 添加权限
+
+
+        // 3. 返回权限
         return null;
     }
 }
