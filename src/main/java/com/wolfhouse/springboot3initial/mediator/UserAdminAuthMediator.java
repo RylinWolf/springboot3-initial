@@ -1,8 +1,13 @@
 package com.wolfhouse.springboot3initial.mediator;
 
+import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
+
+import java.util.List;
 
 /**
  * @author Rylin Wolf
@@ -60,4 +65,13 @@ public interface UserAdminAuthMediator {
      * @return 如果管理员名称存在，返回 true；否则返回 false
      */
     Boolean isAdminNameExist(String adminName);
+
+    /**
+     *
+     * @param userLoginDto
+     * @return
+     */
+    UserLocalDto tryLogin(UserLoginDto userLoginDto);
+
+    List<Authentication> getAuthByAdminId(Long id);
 }

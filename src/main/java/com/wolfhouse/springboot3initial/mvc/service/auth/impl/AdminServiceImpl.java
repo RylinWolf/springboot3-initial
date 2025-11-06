@@ -17,7 +17,6 @@ import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Admin;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AdminAddDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
-import com.wolfhouse.springboot3initial.util.LocalLoginUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

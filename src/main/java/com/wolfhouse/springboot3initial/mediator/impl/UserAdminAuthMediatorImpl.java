@@ -1,10 +1,21 @@
 package com.wolfhouse.springboot3initial.mediator.impl;
 
+import cn.hutool.json.JSONUtil;
+import com.wolfhouse.springboot3initial.common.result.HttpCode;
+import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
+import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Admin;
+import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
+import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author Rylin Wolf
@@ -33,6 +44,40 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
     @Override
     public Boolean isAdminNameExist(String adminName) {
         return adminService.isAdminNameExist(adminName);
+    }
+
+    @Override
+    public UserLocalDto tryLogin(UserLoginDto userLoginDto) {
+        String certification = userLoginDto.getCertification();
+        String password = userLoginDto.getPassword();
+        // 检查参数
+        ThrowUtil.throwOnCondition(BeanUtil.isAnyBlank(certification, password),
+                                   HttpCode.PARAM_ERROR.message);
+
+        // 验证用户名密码是否匹配
+        if (!userService.verify(certification, password)) {
+            return null;
+        }
+        // 获取登录用户
+        User user = userService.getByCertificate(certification);
+        // 获取管理员信息并保存权限
+        Admin admin = adminService.getById(user.getId());
+        // 创建本地登录用户实例
+        UserLocalDto localDto = BeanUtil.copyProperties(user, UserLocalDto.class);
+
+        if (admin != null) {
+            localDto.setIsAdmin(true);
+        }
+        return localDto;
+    }
+
+    @Override
+    public List<Authentication> getAuthByAdminId(Long id) {
+        // 获取管理员的权限
+        List<Long> authIds = JSONUtil.toList(adminService.getById(id)
+                                                         .getAuthentication(), Long.class);
+        // 获取权限映射
+        return authService.getByIds(authIds);
     }
 
     // region 注册服务

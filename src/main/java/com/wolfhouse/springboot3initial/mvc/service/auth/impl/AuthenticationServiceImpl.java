@@ -7,11 +7,14 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.wolfhouse.springboot3initial.common.constant.AuthenticationConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
+import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.mapper.auth.AuthenticationMapper;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AuthenticationDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AuthenticationQueryDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -24,7 +27,17 @@ import java.util.List;
  * @since 1.0
  */
 @Service
+@RequiredArgsConstructor
 public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper, Authentication> implements AuthenticationService {
+    private final UserAdminAuthMediator mediator;
+
+    // region 初始化
+
+    @PostConstruct
+    public void init() {
+        this.mediator.registerAuthService(this);
+    }
+    // endregion
 
     // region 查询
 

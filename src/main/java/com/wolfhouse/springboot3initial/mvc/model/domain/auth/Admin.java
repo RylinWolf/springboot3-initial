@@ -30,6 +30,8 @@ public class Admin {
 
     /**
      * 管理权限
+     * <p>
+     * 格式为权限 Id 列表: [1, ...]
      */
     @Column(value = "authentication")
     private String authentication;

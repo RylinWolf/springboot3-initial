@@ -8,7 +8,6 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
-import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 用户表 服务层。
@@ -18,25 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface UserService extends IService<User> {
     // region 登录相关
-
-    /**
-     * 用户登录方法。
-     *
-     * @param certificate 用户凭证（如电子邮件、手机号码或用户名），用于唯一标识用户
-     * @param password    用户的登录密码，用于身份验证
-     * @param request     用于获取当前登录用户的 HTTP 请求对象
-     * @return 如果登录成功返回 true，否则返回 false
-     */
-    Boolean login(String certificate, String password, HttpServletRequest request);
-
-    /**
-     * 用户登出方法。
-     * <p>
-     * 此方法用于注销当前登录的用户，清除其会话信息，并使其无法再访问需要身份验证的资源。
-     *
-     * @param request 用于获取当前登录用户的 HTTP 请求对象
-     */
-    void logout(HttpServletRequest request);
 
     /**
      * 验证用户凭证和密码的正确性。

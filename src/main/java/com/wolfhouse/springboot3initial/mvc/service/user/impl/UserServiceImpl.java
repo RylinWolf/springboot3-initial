@@ -27,9 +27,7 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
-import com.wolfhouse.springboot3initial.util.LocalLoginUtil;
 import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.openapitools.jackson.nullable.JsonNullable;
@@ -66,33 +64,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     // endregion
 
     // region 登录相关
-
-    @Override
-    public Boolean login(String certificate, String password, HttpServletRequest request) {
-        // 1. 检查参数
-        ThrowUtil.throwOnCondition(BeanUtil.isAnyBlank(certificate, password),
-                                   HttpCode.PARAM_ERROR.message);
-        // 2. 验证用户信息
-        if (!verify(certificate, password)) {
-            return false;
-        }
-        // 3. 保存至 session
-        User user = getByCertificate(certificate);
-        UserLocalDto localDto = BeanUtil.copyProperties(user, UserLocalDto.class);
-        localDto.setIsAdmin(mediator.isAdmin(user.getId()));
-        request.getSession()
-               .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY,
-                             localDto);
-        // 4. 保存至本地状态存储
-        LocalLoginUtil.setUser(localDto);
-        return true;
-    }
-
-    @Override
-    public void logout(HttpServletRequest request) {
-        request.getSession()
-               .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
-    }
 
     @Override
     public Boolean verify(String certificate, String password) {

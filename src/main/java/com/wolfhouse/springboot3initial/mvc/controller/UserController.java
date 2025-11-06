@@ -1,12 +1,22 @@
 package com.wolfhouse.springboot3initial.mvc.controller;
 
+import com.wolfhouse.springboot3initial.common.constant.UserConstant;
+import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -20,7 +30,33 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Tag(name = "用户接口")
 public class UserController {
+    private final AuthenticationManager authenticationManager;
     private final UserService userService;
+
+    @PostMapping
+    @Operation(description = "登录")
+    public HttpResult<UserVo> login(@RequestBody @Valid UserLoginDto dto,
+                                    HttpServletRequest request,
+                                    HttpServletResponse response) {
+        // 1. 通过 authenticationManager 验证
+        Authentication authenticate =
+            authenticationManager.authenticate(
+                UsernamePasswordAuthenticationToken.unauthenticated(
+                    dto.getCertification(),
+                    dto.getPassword()));
+        // 2. 判断验证是否通过
+        if (!authenticate.isAuthenticated()) {
+            // 未通过
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return HttpResult.failed(HttpCode.PARAM_ERROR, UserConstant.LOGIN_FAILED, null);
+        }
+        // 3. 通过，将 provider 中注入的 userLocal 保存到 session
+        UserLocalDto localDto = (UserLocalDto) authenticate.getDetails();
+        request.getSession()
+               .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY,
+                             localDto);
+        return HttpResult.success(userService.getVoById(localDto.getId()));
+    }
 
     @PostMapping
     @Operation(description = "用户注册")
