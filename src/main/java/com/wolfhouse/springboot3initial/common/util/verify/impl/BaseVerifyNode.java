@@ -57,8 +57,8 @@ public abstract class BaseVerifyNode<T> implements VerifyNode<T> {
 
     @Override
     public boolean verify() {
-        if (t == null && allowNull) {
-            return true;
+        if (t == null) {
+            return allowNull;
         }
 
         if (predicate != null) {
