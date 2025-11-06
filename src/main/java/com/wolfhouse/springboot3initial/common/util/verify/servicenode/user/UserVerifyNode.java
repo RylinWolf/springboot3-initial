@@ -23,4 +23,12 @@ public class UserVerifyNode {
             .setStrategy(VerifyStrategy.WITH_CUSTOM_EXCEPTION)
             .setCustomException(new VerifyException(UserConstant.ILLEGAL_USERNAME));
     }
+
+    public static StrLenVerifyNode status(String status) {
+        return (StrLenVerifyNode) new StrLenVerifyNode(status)
+            .max(200L)
+            .allowNull(true)
+            .setStrategy(VerifyStrategy.WITH_CUSTOM_EXCEPTION)
+            .setCustomException(new VerifyException(UserConstant.ILLEGAL_STATUS));
+    }
 }
