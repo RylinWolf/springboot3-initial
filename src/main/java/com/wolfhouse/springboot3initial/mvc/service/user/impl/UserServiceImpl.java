@@ -79,6 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 3. 保存至 session
         User user = getByCertificate(certificate);
         UserLocalDto localDto = BeanUtil.copyProperties(user, UserLocalDto.class);
+        localDto.setIsAdmin(mediator.isAdmin(user.getId()));
         request.getSession()
                .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY,
                              localDto);
@@ -204,12 +205,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     public UserVo update(UserUpdateDto dto) throws Exception {
         // 1. 获取当前登录用户
-        UserLocalDto user = LocalLoginUtil.getUser();
-        // 未登录，不允许操作
-        ThrowUtil.throwIfBlank(user,
-                               HttpCode.UN_AUTHORIZED.code,
-                               HttpCode.UN_AUTHORIZED.message,
-                               ServiceException.class);
+        // 未登录则抛出异常
+        UserLocalDto user = LocalLoginUtil.getUserOrThrow();
+
         // 2. 构建更新条件
         // 获取字段
         JsonNullable<String> username = dto.getUsername();

@@ -44,4 +44,20 @@ public interface UserAdminAuthMediator {
      * @param adminService 管理员服务组件实例
      */
     void registerAdminService(AdminService adminService);
+
+    /**
+     * 检查具有指定ID的用户是否是管理员。
+     *
+     * @param id 用户的唯一标识符
+     * @return 如果用户是管理员，返回true；否则返回false
+     */
+    Boolean isAdmin(Long id);
+
+    /**
+     * 检查指定的管理员名称是否存在。
+     *
+     * @param adminName 管理员名称，用于唯一标识管理员
+     * @return 如果管理员名称存在，返回 true；否则返回 false
+     */
+    Boolean isAdminNameExist(String adminName);
 }

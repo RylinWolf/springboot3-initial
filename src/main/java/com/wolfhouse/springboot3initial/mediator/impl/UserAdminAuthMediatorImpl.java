@@ -25,6 +25,16 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
         return userService.isUserEmailExist(email);
     }
 
+    @Override
+    public Boolean isAdmin(Long id) {
+        return adminService.isAdmin(id);
+    }
+
+    @Override
+    public Boolean isAdminNameExist(String adminName) {
+        return adminService.isAdminNameExist(adminName);
+    }
+
     // region 注册服务
 
     @Override
@@ -41,5 +51,6 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
     public void registerAdminService(AdminService adminService) {
         this.adminService = adminService;
     }
+
     // endregion
 }

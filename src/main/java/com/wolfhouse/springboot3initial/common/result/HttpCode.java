@@ -13,6 +13,7 @@ public enum HttpCode {
     FORBIDDEN(HttpStatus.FORBIDDEN.value(), "访问被拒绝"),
     PARAM_ERROR(40010, "参数错误"),
     UN_AUTHORIZED(40100, "未登录"),
+    NO_PERMISSION(40311, "无操作权限"),
     UNKNOWN(50099, "未知错误"),
     SQL_ERROR(50011, "SQL 错误"),
     ;

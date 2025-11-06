@@ -13,4 +13,5 @@ public class UserLocalDto {
     private String username;
     private String email;
     private String account;
+    private Boolean isAdmin;
 }
