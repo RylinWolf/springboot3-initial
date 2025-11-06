@@ -91,7 +91,6 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
                                    HttpCode.SQL_ERROR.code,
                                    HttpCode.SQL_ERROR.message);
 
-
         // 3. 返回管理员
         return getById(admin.getUserId());
     }

@@ -17,6 +17,7 @@ public interface AdminService extends IService<Admin> {
      *
      * @param dto 管理员添加 dto
      * @return 返回新增的管理员对象。
+     * @throws Exception 参数校验失败时抛出异常
      */
     Admin addAdmin(AdminAddDto dto) throws Exception;
 
