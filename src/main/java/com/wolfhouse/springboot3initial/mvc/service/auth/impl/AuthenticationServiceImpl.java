@@ -35,6 +35,12 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
     }
 
     @Override
+    public List<Authentication> getByCodes(Collection<String> codes) {
+        return list(QueryWrapper.create()
+                                .in(Authentication::getCode, codes));
+    }
+
+    @Override
     public Page<Authentication> queryBy(AuthenticationQueryDto dto) {
         QueryWrapper wrapper = QueryWrapper.create()
                                            .from(Authentication.class);

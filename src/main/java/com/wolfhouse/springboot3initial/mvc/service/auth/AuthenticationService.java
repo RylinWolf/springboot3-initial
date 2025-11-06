@@ -44,6 +44,15 @@ public interface AuthenticationService extends IService<Authentication> {
      */
     List<Authentication> getByIds(Collection<Long> ids);
 
+
+    /**
+     * 根据指定的权限标识集合批量查询权限信息
+     *
+     * @param codes 权限标识集合。
+     * @return 返回包含对应权限信息的列表。如果未找到对应的权限信息，可能返回空列表。
+     */
+    List<Authentication> getByCodes(Collection<String> codes);
+
     /**
      * 检查指定权限是否存在。
      *
