@@ -2,6 +2,7 @@ package com.wolfhouse.springboot3initial.handler;
 
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.sql.SQLSyntaxErrorException;
  */
 @Slf4j
 @RestControllerAdvice
+@Hidden
 public class GlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<HttpResult<?>> sqlException(SQLSyntaxErrorException e) {
