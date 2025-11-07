@@ -26,4 +26,11 @@ public class GlobalExceptionHandler {
         return HttpResult.failedWithStatus(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                            HttpCode.SQL_ERROR);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<HttpResult<?>> httpException(Exception e) {
+        log.error("业务异常: {}", e.getMessage(), e);
+        return HttpResult.failedWithStatus(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                           HttpCode.UNKNOWN);
+    }
 }
