@@ -31,6 +31,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,6 +65,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     // endregion
 
     // region 登录相关
+
+    @Override
+    public UserLocalDto getLogin() {
+        return (UserLocalDto) SecurityContextHolder.getContext()
+                                                   .getAuthentication()
+                                                   .getDetails();
+    }
+
+    @Override
+    public UserLocalDto getLoginOrThrow() {
+        UserLocalDto login = getLogin();
+        ThrowUtil.throwIfBlank(login,
+                               HttpCode.UN_AUTHORIZED.code,
+                               HttpCode.UN_AUTHORIZED.message);
+        return login;
+    }
 
     @Override
     public Boolean verify(String certificate, String password) {
@@ -177,7 +194,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserVo update(UserUpdateDto dto) throws Exception {
         // 1. 获取当前登录用户
         // 未登录则抛出异常
-        UserLocalDto user = LocalLoginUtil.getUserOrThrow();
+        UserLocalDto user = getLoginOrThrow();
 
         // 2. 构建更新条件
         // 获取字段

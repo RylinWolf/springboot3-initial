@@ -4,6 +4,7 @@ package com.wolfhouse.springboot3initial.mvc.service.user;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
@@ -17,6 +18,10 @@ import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
  */
 public interface UserService extends IService<User> {
     // region 登录相关
+
+    UserLocalDto getLogin();
+
+    UserLocalDto getLoginOrThrow();
 
     /**
      * 验证用户凭证和密码的正确性。

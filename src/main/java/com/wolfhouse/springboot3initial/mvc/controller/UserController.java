@@ -33,8 +33,8 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
 
-    @PostMapping
-    @Operation(description = "登录")
+    @PostMapping("/login")
+    @Operation(summary = "登录")
     public HttpResult<UserVo> login(@RequestBody @Valid UserLoginDto dto,
                                     HttpServletRequest request,
                                     HttpServletResponse response) {
@@ -59,7 +59,7 @@ public class UserController {
     }
 
     @PostMapping
-    @Operation(description = "用户注册")
+    @Operation(summary = "用户注册")
     public HttpResult<UserVo> register(@RequestBody UserRegisterDto dto) {
         // 1. 调用业务方法
         UserVo vo = userService.register(dto);
@@ -74,7 +74,7 @@ public class UserController {
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
     @DeleteMapping("/{id}")
-    @Operation(description = "用户删除")
+    @Operation(summary = "用户删除")
     public boolean remove(@PathVariable Long id) {
         return userService.removeById(id);
     }
@@ -87,7 +87,7 @@ public class UserController {
      * @return 用户表详情
      */
     @GetMapping("/{id}")
-    @Operation(description = "按 ID 获取用户 Vo")
+    @Operation(summary = "按 ID 获取用户 Vo")
     public UserVo getInfo(@PathVariable Long id) {
         return userService.getVoById(id);
     }

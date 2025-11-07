@@ -74,4 +74,6 @@ public interface UserAdminAuthMediator {
     UserLocalDto tryLogin(UserLoginDto userLoginDto);
 
     List<Authentication> getAuthByAdminId(Long id);
+
+    UserLocalDto getLoginOrThrow();
 }

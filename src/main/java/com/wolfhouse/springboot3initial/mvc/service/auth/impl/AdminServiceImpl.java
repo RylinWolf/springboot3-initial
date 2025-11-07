@@ -65,7 +65,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     public Admin addAdmin(AdminAddDto dto) throws Exception {
         // 1. 检查参数
         // 获取登录用户
-        UserLocalDto user = LocalLoginUtil.getUserOrThrow();
+        UserLocalDto user = mediator.getLoginOrThrow();
         // 检查参数
         VerifyTool.of(
                       // 登录用户是否为管理员

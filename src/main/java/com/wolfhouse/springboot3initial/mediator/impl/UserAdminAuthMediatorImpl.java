@@ -64,7 +64,7 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
         Admin admin = adminService.getById(user.getId());
         // 创建本地登录用户实例
         UserLocalDto localDto = BeanUtil.copyProperties(user, UserLocalDto.class);
-
+        localDto.setIsAdmin(false);
         if (admin != null) {
             localDto.setIsAdmin(true);
         }
@@ -78,6 +78,11 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
                                                          .getAuthentication(), Long.class);
         // 获取权限映射
         return authService.getByIds(authIds);
+    }
+
+    @Override
+    public UserLocalDto getLoginOrThrow() {
+        return userService.getLoginOrThrow();
     }
 
     // region 注册服务

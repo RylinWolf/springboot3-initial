@@ -3,7 +3,8 @@ package com.wolfhouse.springboot3initial.mvc.controller;
 import com.mybatisflex.core.paginate.Page;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Admin;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
@@ -17,10 +18,10 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/admin")
+@Tag(name = "管理员接口")
+@RequiredArgsConstructor
 public class AdminController {
-
-    @Autowired
-    private AdminService adminService;
+    private final AdminService adminService;
 
     /**
      * 添加 管理员表

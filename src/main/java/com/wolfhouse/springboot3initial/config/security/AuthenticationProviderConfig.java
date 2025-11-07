@@ -14,6 +14,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Rylin Wolf
@@ -42,7 +43,8 @@ public class AuthenticationProviderConfig implements AuthenticationProvider {
         // 初始化权限列表
         List<com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication> authList = List.of();
         // 注入权限
-        if (localDto.getIsAdmin()) {
+        if (Optional.ofNullable(localDto.getIsAdmin())
+                    .orElse(false)) {
             authList = mediator.getAuthByAdminId(localDto.getId());
         }
         // 2. 登录成功返回用户名密码认证类实例
@@ -50,10 +52,9 @@ public class AuthenticationProviderConfig implements AuthenticationProvider {
             new UsernamePasswordAuthenticationToken(certificate,
                                                     password,
                                                     authList);
-        
+
         // 将 userLocal 注入到认证对象的 details 中，便于外层保存至 session
         token.setDetails(localDto);
-        token.setAuthenticated(true);
         return token;
     }
 

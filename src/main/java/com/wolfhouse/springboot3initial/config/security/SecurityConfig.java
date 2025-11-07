@@ -21,6 +21,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(a -> {
                 a.requestMatchers(SecurityConstant.WHITELIST)
                  .permitAll();
+                a.requestMatchers(SecurityConstant.STATIC_PATH_WHITELIST)
+                 .permitAll();
                 a.anyRequest()
                  .authenticated();
             });

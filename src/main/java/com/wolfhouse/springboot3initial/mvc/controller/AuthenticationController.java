@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/authentication")
-@Tag(name = "权限表控制层")
+@Tag(name = "权限表接口")
 public class AuthenticationController {
 
     @Autowired
