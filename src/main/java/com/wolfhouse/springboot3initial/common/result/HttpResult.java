@@ -38,9 +38,13 @@ public class HttpResult<T> implements Serializable {
     }
 
     public static <T> HttpResult<T> failed(@NonNull HttpCode code, String msg, T data) {
+        return failed(code.code, msg, data);
+    }
+
+    public static <T> HttpResult<T> failed(@NonNull Integer code, String msg, T data) {
         return HttpResult.<T>builder()
                          .success(false)
-                         .code(code.code)
+                         .code(code)
                          .message(msg)
                          .data(data)
                          .build();

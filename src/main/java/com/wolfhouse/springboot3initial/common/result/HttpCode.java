@@ -11,6 +11,7 @@ public enum HttpCode {
     /** 成功 */
     SUCCESS(HttpStatus.OK.value(), ""),
     FORBIDDEN(HttpStatus.FORBIDDEN.value(), "访问被拒绝"),
+    BAD_REQUEST(40000, "请求错误"),
     PARAM_ERROR(40010, "参数错误"),
     UN_AUTHORIZED(40100, "未登录"),
     NO_PERMISSION(40311, "无操作权限"),
@@ -24,5 +25,14 @@ public enum HttpCode {
     HttpCode(int code, String message) {
         this.code = code;
         this.message = message;
+    }
+
+    public static HttpCode ofCode(int code) {
+        for (HttpCode httpCode : HttpCode.values()) {
+            if (httpCode.code == code) {
+                return httpCode;
+            }
+        }
+        return UNKNOWN;
     }
 }

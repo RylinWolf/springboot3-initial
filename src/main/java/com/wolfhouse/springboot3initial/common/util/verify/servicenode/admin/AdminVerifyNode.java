@@ -6,8 +6,8 @@ import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
  * @author Rylin Wolf
  */
 public class AdminVerifyNode {
-    public static IsAdminVerifyNode isAdmin(UserAdminAuthMediator mediator) {
-        return new IsAdminVerifyNode(mediator);
+    public static IsAdminVerifyNode isAdmin(UserAdminAuthMediator mediator, Boolean reversed) {
+        return new IsAdminVerifyNode(mediator, reversed);
     }
 
     public static AdminNameNotExistVerifyNode nameExist(UserAdminAuthMediator mediator, String adminName) {

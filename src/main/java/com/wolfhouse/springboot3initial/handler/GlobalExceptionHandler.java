@@ -2,6 +2,8 @@ package com.wolfhouse.springboot3initial.handler;
 
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
+import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -51,8 +53,31 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<HttpResult<?>> httpException(Exception e) {
+    public ResponseEntity<HttpResult<?>> serviceException(ServiceException e) {
         log.error("业务异常: {}", e.getMessage(), e);
+        Integer code = e.getCode();
+        HttpCode httpCode = HttpCode.BAD_REQUEST;
+        if (code == null) {
+            code = HttpStatus.BAD_REQUEST.value();
+        } else {
+            httpCode = HttpCode.ofCode(code);
+            code = Integer.valueOf(code.toString()
+                                       .substring(0, 3));
+        }
+        return HttpResult.failedWithStatus(code, httpCode, e.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<HttpResult<?>> verifyException(VerifyException e) {
+        log.error("字段校验异常: {}", e.getMessage(), e);
+        return HttpResult.failedWithStatus(HttpStatus.BAD_REQUEST.value(),
+                                           HttpCode.BAD_REQUEST,
+                                           e.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<HttpResult<?>> httpException(Exception e) {
+        log.error("其他异常: {}", e.getMessage(), e);
         return HttpResult.failedWithStatus(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                            HttpCode.UNKNOWN);
     }

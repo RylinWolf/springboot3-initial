@@ -1,5 +1,8 @@
 package com.wolfhouse.springboot3initial.common.util.verify.servicenode.admin;
 
+import com.wolfhouse.springboot3initial.common.constant.AuthenticationConstant;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
+import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.BaseVerifyNode;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 
@@ -10,6 +13,12 @@ import java.util.Collection;
  */
 public class AuthIdsExistVerifyNode extends BaseVerifyNode<Collection<Long>> {
     private final UserAdminAuthMediator mediator;
+
+    {
+        this.allowNull = true;
+        this.strategy = VerifyStrategy.WITH_CUSTOM_EXCEPTION;
+        this.customException = new VerifyException(AuthenticationConstant.AUTH_NOT_EXIST);
+    }
 
     public AuthIdsExistVerifyNode(UserAdminAuthMediator mediator) {
         this.mediator = mediator;

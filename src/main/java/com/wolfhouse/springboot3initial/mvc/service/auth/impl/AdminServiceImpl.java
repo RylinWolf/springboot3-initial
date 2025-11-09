@@ -4,12 +4,14 @@ package com.wolfhouse.springboot3initial.mvc.service.auth.impl;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.wolfhouse.springboot3initial.common.constant.AuthenticationConstant;
+import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyTool;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.EmptyVerifyNode;
 import com.wolfhouse.springboot3initial.common.util.verify.servicenode.admin.AdminVerifyNode;
+import com.wolfhouse.springboot3initial.common.util.verify.servicenode.admin.AuthVerifyNode;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.mapper.auth.AdminMapper;
@@ -75,13 +77,19 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
                       // 用户是否存在
                       EmptyVerifyNode.of(dto.getUserId())
                                      .predicate(mediator::isUserExist)
-                                     .exception(new ServiceException(HttpCode.PARAM_ERROR)),
+                                     .exception(new ServiceException(HttpCode.PARAM_ERROR,
+                                                                     UserConstant.USER_NOT_EXIST)),
+                      // 用户是否已经是管理员
+                      AdminVerifyNode.isAdmin(mediator, true)
+                                     .target(dto.getUserId())
+                                     .exception(new ServiceException(HttpCode.BAD_REQUEST,
+                                                                     AuthenticationConstant.ADMIN_ALREADY_EXIST)),
                       // 管理员名称是否已存在
                       AdminVerifyNode.nameExist(mediator, dto.getAdminName())
                                      .exception(new ServiceException(HttpCode.PARAM_ERROR.code,
-                                                                     AuthenticationConstant.ADMIN_NAME_EXIST))
-                      // TODO 权限是否存在
-
+                                                                     AuthenticationConstant.ADMIN_NAME_EXIST)),
+                      // 权限是否存在
+                      AuthVerifyNode.idsExist(mediator, dto.getAuthentication())
                      )
                   .doVerify();
 

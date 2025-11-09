@@ -10,24 +10,30 @@ import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
  */
 public class IsAdminVerifyNode extends BaseVerifyNode<Long> {
     private final UserAdminAuthMediator mediator;
+    private final Boolean reversed;
 
     {
         this.allowNull = false;
         this.customException = new ServiceException(AuthenticationConstant.NOT_ADMIN);
     }
 
-    public IsAdminVerifyNode(UserAdminAuthMediator mediator) {
+    public IsAdminVerifyNode(UserAdminAuthMediator mediator, Boolean reversed) {
         this.mediator = mediator;
+        this.reversed = reversed;
     }
 
-    public IsAdminVerifyNode(Long aLong, UserAdminAuthMediator mediator) {
+    public IsAdminVerifyNode(Long aLong, UserAdminAuthMediator mediator, Boolean reversed) {
         super(aLong);
         this.mediator = mediator;
+        this.reversed = reversed;
+
     }
 
-    public IsAdminVerifyNode(Long aLong, Boolean allowNull, UserAdminAuthMediator mediator) {
+    public IsAdminVerifyNode(Long aLong, Boolean allowNull, UserAdminAuthMediator mediator, Boolean reversed) {
         super(aLong, allowNull);
         this.mediator = mediator;
+        this.reversed = reversed;
+
     }
 
     @Override
@@ -35,7 +41,8 @@ public class IsAdminVerifyNode extends BaseVerifyNode<Long> {
         if (t == null) {
             return allowNull;
         }
-
-        return mediator.isAdmin(t);
+        Boolean result = mediator.isAdmin(t);
+        // 若不反转，则返回结果本身：reversed = false,  result = true, !reversed.equals(result) = true
+        return !reversed.equals(result);
     }
 }
