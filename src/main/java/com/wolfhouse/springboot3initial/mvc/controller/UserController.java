@@ -59,6 +59,14 @@ public class UserController {
         return HttpResult.success(userService.getVoById(localDto.getId()));
     }
 
+    @DeleteMapping("/logout")
+    @Operation(summary = "注销登录")
+    public HttpResult<?> logout(HttpServletRequest request) {
+        request.getSession()
+               .removeAttribute(UserConstant.LOGIN_USER_SESSION_KEY);
+        return HttpResult.success();
+    }
+
     @PostMapping
     @Operation(summary = "用户注册")
     public HttpResult<UserVo> register(@RequestBody UserRegisterDto dto) {
