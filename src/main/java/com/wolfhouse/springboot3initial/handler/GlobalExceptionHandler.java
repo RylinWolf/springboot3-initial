@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -21,6 +22,13 @@ import java.sql.SQLSyntaxErrorException;
 @RestControllerAdvice
 @Hidden
 public class GlobalExceptionHandler {
+    @ExceptionHandler
+    public ResponseEntity<HttpResult<?>> authDeniedException(AuthorizationDeniedException e) {
+        log.error("无权限: {}, {}", e.getMessage(), e.getAuthorizationResult());
+        return HttpResult.failedWithStatus(HttpStatus.FORBIDDEN.value(),
+                                           HttpCode.NO_PERMISSION);
+    }
+
     @ExceptionHandler
     public ResponseEntity<HttpResult<?>> sqlException(SQLSyntaxErrorException e) {
         log.error("SQL 异常: {}", e.getMessage(), e);
