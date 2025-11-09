@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.config.security;
+package com.wolfhouse.springboot3initial.security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

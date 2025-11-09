@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.config.security;
+package com.wolfhouse.springboot3initial.security.config;
 
 import cn.hutool.json.JSONUtil;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;

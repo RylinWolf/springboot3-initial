@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
@@ -22,10 +22,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/authentication")
 @Tag(name = "权限表接口")
+@RequiredArgsConstructor
 public class AuthenticationController {
-
-    @Autowired
-    private AuthenticationService authenticationService;
+    private final AuthenticationService authenticationService;
 
     /**
      * 添加 权限表
@@ -44,7 +43,6 @@ public class AuthenticationController {
 
         @Parameter(name = "description", description = "描述", required = true)
     })
-
     public boolean save(@RequestBody Authentication authentication) {
         return authenticationService.save(authentication);
     }

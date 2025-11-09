@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.config.security;
+package com.wolfhouse.springboot3initial.security;
 
 /**
  * @author Rylin Wolf
