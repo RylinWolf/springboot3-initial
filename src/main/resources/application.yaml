@@ -20,7 +20,9 @@ spring:
       password: 123456
       port: 6379
       database: 0
-
+  session:
+    # session 3 天过期
+    timeout: 259200
 # 自定义配置
 custom:
   # 自定义日期格式配置
