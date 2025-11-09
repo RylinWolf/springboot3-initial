@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.config.interceptor;
+package com.wolfhouse.springboot3initial.config.filter;
 
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
@@ -6,7 +6,8 @@ import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
-import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -14,8 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -23,20 +25,20 @@ import java.util.List;
  */
 @Component
 @RequiredArgsConstructor
-public class LoginStoreInterceptor implements HandlerInterceptor {
-    private final AuthenticationService authenticationService;
+public class LoginStoreFilter extends OncePerRequestFilter {
     private final UserAdminAuthMediator mediator;
 
     @Override
-    public boolean preHandle(@NonNull HttpServletRequest request,
-                             @NonNull HttpServletResponse response,
-                             @NonNull Object handler) throws Exception {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         // 1. 获取登录用户，验证字段
         UserLocalDto loginUser = (UserLocalDto) request.getSession()
                                                        .getAttribute(UserConstant.LOGIN_USER_SESSION_KEY);
         // 未登录，直接放行
         if (loginUser == null) {
-            return true;
+            filterChain.doFilter(request, response);
+            return;
         }
         // 2. 获取登录用户权限，保存至安全上下文
         if (!mediator.isUserExist(loginUser.getId())) {
@@ -56,8 +58,10 @@ public class LoginStoreInterceptor implements HandlerInterceptor {
             new UsernamePasswordAuthenticationToken(loginUser.getId(),
                                                     null,
                                                     authList);
+        token.setDetails(loginUser);
         SecurityContextHolder.getContext()
                              .setAuthentication(token);
-        return true;
+
+        filterChain.doFilter(request, response);
     }
 }
