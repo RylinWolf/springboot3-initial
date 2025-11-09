@@ -50,7 +50,7 @@ public class AuthenticationProviderConfig implements AuthenticationProvider {
         // 2. 登录成功返回用户名密码认证类实例
         UsernamePasswordAuthenticationToken token =
             new UsernamePasswordAuthenticationToken(certificate,
-                                                    password,
+                                                    null,
                                                     authList);
 
         // 将 userLocal 注入到认证对象的 details 中，便于外层保存至 session

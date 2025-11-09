@@ -106,9 +106,9 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
         }
         // 获取所有权限
         List<Authentication> auths = getByIds(authIds);
+        List<Long> childIds = mapper.getChildIds(authIds);
         // 递归获取所有子权限
-        // TODO 递归获取
-        auths.addAll(mapper.getChild(authIds));
+        auths.addAll(getByIdsWithChild(childIds));
         return auths;
     }
 

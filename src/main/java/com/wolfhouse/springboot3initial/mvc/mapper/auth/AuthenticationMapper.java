@@ -20,5 +20,5 @@ public interface AuthenticationMapper extends BaseMapper<Authentication> {
      * @param authIds 一个包含权限 ID 的列表，用于指定需要查询子权限的权限。
      * @return 包含所有匹配的子权限的列表，如果没有匹配的子权限，则返回空列表。
      */
-    List<Authentication> getChild(List<Long> authIds);
+    List<Long> getChildIds(List<Long> authIds);
 }
