@@ -8,6 +8,7 @@ public class SecurityConstant {
         "/v3/api-docs/**",
         "/webjars/**",
         "/user/login",
+        "/user/register",
         };
     public static final String[] STATIC_PATH_WHITELIST = {
         "/",
@@ -19,4 +20,7 @@ public class SecurityConstant {
         "/favicon.ico",
         "/doc.html",
         };
+    public static final String[] REGISTER = {
+        "/user"
+    };
 }

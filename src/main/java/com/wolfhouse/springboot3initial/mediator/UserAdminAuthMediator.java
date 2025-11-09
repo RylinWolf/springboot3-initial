@@ -8,6 +8,7 @@ import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -99,4 +100,12 @@ public interface UserAdminAuthMediator {
      * @return 如果所有权限ID都存在返回true，否则返回false
      */
     Boolean areAuthIdsExist(Collection<Long> t);
+
+    /**
+     * 更新会话的最后访问时间。
+     *
+     * @param time 表示最后访问时间的 {@code LocalDateTime} 对象
+     * @return 如果更新成功，返回 {@code true}；否则返回 {@code false}
+     */
+    Boolean updateAccessedTime(LocalDateTime time);
 }

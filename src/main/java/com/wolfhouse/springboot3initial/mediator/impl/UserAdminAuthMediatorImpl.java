@@ -15,6 +15,7 @@ import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -89,6 +90,13 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
     @Override
     public Boolean areAuthIdsExist(Collection<Long> ids) {
         return authService.areAuthIdsExist(ids);
+    }
+
+    @Override
+    public Boolean updateAccessedTime(LocalDateTime time) {
+        User user = userService.getById(getLoginOrThrow().getId());
+        user.setLoginDate(time);
+        return userService.updateById(user);
     }
 
     // region 注册服务

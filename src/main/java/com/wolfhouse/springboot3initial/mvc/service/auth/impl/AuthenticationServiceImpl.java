@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -100,9 +101,13 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
 
     @Override
     public List<Authentication> getByIdsWithChild(List<Long> authIds) {
+        if (authIds == null || authIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         // 获取所有权限
         List<Authentication> auths = getByIds(authIds);
-        // 获取所有子权限
+        // 递归获取所有子权限
+        // TODO 递归获取
         auths.addAll(mapper.getChild(authIds));
         return auths;
     }
