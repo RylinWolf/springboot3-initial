@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.config.filter;
+package com.wolfhouse.springboot3initial.security.filter;
 
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
