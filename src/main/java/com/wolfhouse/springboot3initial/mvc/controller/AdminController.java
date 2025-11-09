@@ -59,6 +59,7 @@ public class AdminController {
      * @return {@code true} 更新成功，{@code false} 更新失败
      */
     @PutMapping("/update")
+    @PreAuthorize("@pm.hasPerm('service:admin:update')")
     public boolean update(@RequestBody Admin admin) {
         return adminService.updateById(admin);
     }
@@ -70,6 +71,7 @@ public class AdminController {
      * @return 所有数据
      */
     @GetMapping("/list")
+    @PreAuthorize("@pm.hasPerm('service:admin:query')")
     public List<Admin> list() {
         return adminService.list();
     }
@@ -82,6 +84,7 @@ public class AdminController {
      * @return 管理员表详情
      */
     @GetMapping("/getInfo/{id}")
+    @PreAuthorize("@pm.hasPerm('service:admin:query')")
     public Admin getInfo(@PathVariable Serializable id) {
         return adminService.getById(id);
     }
@@ -94,6 +97,7 @@ public class AdminController {
      * @return 分页对象
      */
     @GetMapping("/page")
+    @PreAuthorize("@pm.hasPerm('service:admin:query')")
     public Page<Admin> page(Page<Admin> page) {
         return adminService.page(page);
     }

@@ -10,19 +10,29 @@ public interface PermissionConstant {
     String SERVICE = "service";
     String ADMIN = "admin";
     String USER = "user";
+    String AUTH = "auth";
 
+    /**
+     * 管理员相关权限 格式: service:admin:*
+     */
     String ADMIN_ALL = PermissionConstant.adminPermission(null);
     String ADMIN_ADD = PermissionConstant.adminPermission("add");
     String ADMIN_UPDATE = PermissionConstant.adminPermission("update");
     String ADMIN_DELETE = PermissionConstant.adminPermission("delete");
     String ADMIN_QUERY = PermissionConstant.adminPermission("query");
 
+    /**
+     * 用户相关权限 格式: service:user:*
+     */
     String USER_ALL = PermissionConstant.userPermission(null);
     String USER_ADD = PermissionConstant.userPermission("add");
     String USER_UPDATE = PermissionConstant.userPermission("update");
     String USER_DELETE = PermissionConstant.userPermission("delete");
 
-    String AUTH_ALL = PermissionConstant.adminPermission(null);
+    /**
+     * 权限相关权限 格式: service:auth:*
+     */
+    String AUTH_ALL = PermissionConstant.authPermission(null);
     String AUTH_ADD = PermissionConstant.authPermission("add");
     String AUTH_UPDATE = PermissionConstant.authPermission("update");
     String AUTH_DELETE = PermissionConstant.authPermission("delete");
@@ -62,8 +72,8 @@ public interface PermissionConstant {
      */
     static String authPermission(String perm) {
         if (perm == null) {
-            return String.join(SEPARATOR, SERVICE, AUTH_ALL);
+            return String.join(SEPARATOR, SERVICE, AUTH);
         }
-        return String.join(SEPARATOR, SERVICE, AUTH_ALL, perm);
+        return String.join(SEPARATOR, SERVICE, AUTH, perm);
     }
 }
