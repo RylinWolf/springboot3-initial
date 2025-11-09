@@ -1,11 +1,8 @@
 package com.wolfhouse.springboot3initial.security;
 
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.HashSet;
 
 /**
@@ -14,10 +11,8 @@ import java.util.HashSet;
 @Component("pm")
 public class PermissionService {
     public static Boolean isAdmin() {
-        UserLocalDto user = (UserLocalDto) SecurityContextHolder.getContext()
-                                                                .getAuthentication()
-                                                                .getDetails();
-        return user.getIsAdmin();
+        return SecurityContextUtil.getLoginUser()
+                                  .getIsAdmin();
     }
 
     public static Boolean hasAnyPerm(String... permissions) {
@@ -27,7 +22,7 @@ public class PermissionService {
             perms.add(new Authentication(permission));
         }
         // 交集，保留集合共有元素
-        perms.retainAll(getAuth());
+        perms.retainAll(SecurityContextUtil.getAuths());
         // 集合为空则无权限
         return !perms.isEmpty();
     }
@@ -39,19 +34,7 @@ public class PermissionService {
      * @return 如果当前用户具备指定的权限则返回 true，否则返回 false。
      */
     public static Boolean hasPerm(String permission) {
-        return getAuth().contains(new Authentication(permission));
-    }
-
-    /**
-     * 获取当前认证用户的认证信息。
-     *
-     * @return 当前认证用户的 {@link Authentication} 对象，如果未认证则返回 null。
-     */
-    @SuppressWarnings("unchecked")
-    public static HashSet<com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication> getAuth() {
-        return new HashSet<>((Collection<Authentication>)
-                                 SecurityContextHolder.getContext()
-                                                      .getAuthentication()
-                                                      .getAuthorities());
+        return SecurityContextUtil.getAuths()
+                                  .contains(new Authentication(permission));
     }
 }

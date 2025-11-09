@@ -2,6 +2,8 @@ package com.wolfhouse.springboot3initial.handler;
 
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
+import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +26,12 @@ import java.sql.SQLSyntaxErrorException;
 public class GlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<HttpResult<?>> authDeniedException(AuthorizationDeniedException e) {
-        log.error("无权限: {}, {}", e.getMessage(), e.getAuthorizationResult());
+        UserLocalDto loginUser = SecurityContextUtil.getLoginUser();
+        log.error("无权限: {}, {}\n操作用户: {}: {}",
+                  e.getMessage(),
+                  e.getAuthorizationResult(),
+                  loginUser.getId(),
+                  loginUser.getAccount());
         return HttpResult.failedWithStatus(HttpStatus.FORBIDDEN.value(),
                                            HttpCode.NO_PERMISSION);
     }
