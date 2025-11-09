@@ -63,6 +63,26 @@ public class HttpResult<T> implements Serializable {
         return BeanUtil.isBlank(data) ? HttpResult.failed(code, failedMsg, data) : HttpResult.success(data);
     }
 
+    public static <T> HttpResult<T> failedIfBlank(HttpCode code, T data) {
+        return BeanUtil.isBlank(data) ? HttpResult.failed(code, code.message, data) : HttpResult.success(data);
+    }
+
+    public static <T> HttpResult<T> failedIfBlank(T data) {
+        return failedIfBlank(null, null, data);
+    }
+
+    public static HttpResult<?> onCondition(HttpCode code, String msg, Boolean condition) {
+        return condition ? HttpResult.success() : HttpResult.failed(code, msg, null);
+    }
+
+    public static HttpResult<?> onCondition(HttpCode code, Boolean condition) {
+        return condition ? HttpResult.success() : HttpResult.failed(code);
+    }
+
+    public static HttpResult<?> onCondition(Boolean condition) {
+        return condition ? HttpResult.success() : HttpResult.failed();
+    }
+
     public static <T> ResponseEntity<HttpResult<T>> failedWithStatus(Integer httpStatus,
                                                                      HttpCode code,
                                                                      String msg,
@@ -95,15 +115,5 @@ public class HttpResult<T> implements Serializable {
         return ResponseEntity.ok(HttpResult.success(data, msg));
     }
 
-    public static <T> HttpResult<T> failedIfBlank(T data) {
-        return failedIfBlank(null, null, data);
-    }
 
-    public static HttpResult<?> onCondition(HttpCode code, String msg, Boolean condition) {
-        return condition ? HttpResult.success() : HttpResult.failed(code, msg, null);
-    }
-
-    public static HttpResult<?> onCondition(HttpCode code, Boolean condition) {
-        return condition ? HttpResult.success() : HttpResult.failed(code);
-    }
 }
