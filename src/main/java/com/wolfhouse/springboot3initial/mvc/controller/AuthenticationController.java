@@ -1,6 +1,9 @@
 package com.wolfhouse.springboot3initial.mvc.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import com.wolfhouse.springboot3initial.common.result.HttpCode;
+import com.wolfhouse.springboot3initial.common.result.HttpResult;
+import com.wolfhouse.springboot3initial.common.result.PageResult;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,8 +48,8 @@ public class AuthenticationController {
         @Parameter(name = "description", description = "描述", required = true)
     })
     @PreAuthorize("@pm.hasPerm('service:auth:add')")
-    public boolean save(@RequestBody Authentication authentication) {
-        return authenticationService.save(authentication);
+    public HttpResult<?> save(@RequestBody Authentication authentication) {
+        return HttpResult.onCondition(authenticationService.save(authentication));
     }
 
 
@@ -62,8 +65,8 @@ public class AuthenticationController {
         @Parameter(name = "id", description = "权限 ID", required = true)
     })
     @PreAuthorize("@pm.hasPerm('service:auth:delete')")
-    public boolean remove(@PathVariable Serializable id) {
-        return authenticationService.removeById(id);
+    public HttpResult<?> remove(@PathVariable Serializable id) {
+        return HttpResult.onCondition(authenticationService.removeById(id));
     }
 
 
@@ -85,8 +88,8 @@ public class AuthenticationController {
         @Parameter(name = "description", description = "描述")
     })
     @PreAuthorize("@pm.hasPerm('service:auth:update')")
-    public boolean update(@RequestBody Authentication authentication) {
-        return authenticationService.updateById(authentication);
+    public HttpResult<Boolean> update(@RequestBody Authentication authentication) {
+        return HttpResult.success(authenticationService.updateById(authentication));
     }
 
 
@@ -98,8 +101,8 @@ public class AuthenticationController {
     @GetMapping("/list")
     @Operation(summary = "查询所有权限表")
     @PreAuthorize("@pm.hasPerm('service:auth:query')")
-    public List<Authentication> list() {
-        return authenticationService.list();
+    public HttpResult<List<Authentication>> list() {
+        return HttpResult.success(authenticationService.list());
     }
 
 
@@ -115,8 +118,8 @@ public class AuthenticationController {
         @Parameter(name = "id", description = "权限 ID", required = true)
     })
     @PreAuthorize("@pm.hasPerm('service:auth:query')")
-    public Authentication getInfo(@PathVariable Serializable id) {
-        return authenticationService.getById(id);
+    public HttpResult<Authentication> getInfo(@PathVariable Serializable id) {
+        return HttpResult.failedIfBlank(HttpCode.UNKNOWN, authenticationService.getById(id));
     }
 
 
@@ -133,7 +136,7 @@ public class AuthenticationController {
         @Parameter(name = "pageSize", description = "每页大小", required = true)
     })
     @PreAuthorize("@pm.hasPerm('service:auth:query')")
-    public Page<Authentication> page(Page<Authentication> page) {
-        return authenticationService.page(page);
+    public HttpResult<PageResult<Authentication>> page(Page<Authentication> page) {
+        return HttpResult.success(PageResult.ofPage(authenticationService.page(page)));
     }
 }

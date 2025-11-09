@@ -1,10 +1,13 @@
 package com.wolfhouse.springboot3initial.mvc.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
+import com.wolfhouse.springboot3initial.common.result.PageResult;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Admin;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AdminAddDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +37,7 @@ public class AdminController {
      */
     @PostMapping
     @PreAuthorize("@pm.hasPerm('service:admin:add')")
+    @Operation(summary = "添加管理员")
     public HttpResult<Admin> add(@RequestBody AdminAddDto dto) throws Exception {
         return HttpResult.failedIfBlank(adminService.addAdmin(dto));
     }
@@ -47,8 +51,9 @@ public class AdminController {
      */
     @DeleteMapping("/remove/{id}")
     @PreAuthorize("@pm.hasPerm('service:admin:delete')")
-    public boolean remove(@PathVariable Serializable id) {
-        return adminService.removeById(id);
+    @Operation(summary = "删除管理员")
+    public HttpResult<?> remove(@PathVariable Serializable id) {
+        return HttpResult.onCondition(HttpCode.UNKNOWN, adminService.removeById(id));
     }
 
 
@@ -60,8 +65,9 @@ public class AdminController {
      */
     @PutMapping("/update")
     @PreAuthorize("@pm.hasPerm('service:admin:update')")
-    public boolean update(@RequestBody Admin admin) {
-        return adminService.updateById(admin);
+    @Operation(summary = "更新管理员")
+    public HttpResult<?> update(@RequestBody Admin admin) {
+        return HttpResult.onCondition(HttpCode.UNKNOWN, adminService.updateById(admin));
     }
 
 
@@ -72,8 +78,9 @@ public class AdminController {
      */
     @GetMapping("/list")
     @PreAuthorize("@pm.hasPerm('service:admin:query')")
-    public List<Admin> list() {
-        return adminService.list();
+    @Operation(summary = "查询所有管理员")
+    public HttpResult<List<Admin>> list() {
+        return HttpResult.success(adminService.list());
     }
 
 
@@ -85,8 +92,9 @@ public class AdminController {
      */
     @GetMapping("/getInfo/{id}")
     @PreAuthorize("@pm.hasPerm('service:admin:query')")
-    public Admin getInfo(@PathVariable Serializable id) {
-        return adminService.getById(id);
+    @Operation(summary = "根据 ID 获取管理员")
+    public HttpResult<Admin> getInfo(@PathVariable Serializable id) {
+        return HttpResult.success(adminService.getById(id));
     }
 
 
@@ -98,7 +106,8 @@ public class AdminController {
      */
     @GetMapping("/page")
     @PreAuthorize("@pm.hasPerm('service:admin:query')")
-    public Page<Admin> page(Page<Admin> page) {
-        return adminService.page(page);
+    @Operation(summary = "分页查询管理员")
+    public HttpResult<PageResult<Admin>> page(Page<Admin> page) {
+        return HttpResult.success(PageResult.ofPage(adminService.page(page)));
     }
 }
