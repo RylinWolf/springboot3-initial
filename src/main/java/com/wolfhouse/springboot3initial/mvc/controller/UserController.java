@@ -67,6 +67,16 @@ public class UserController {
         return HttpResult.failedIfBlank(vo);
     }
 
+    @GetMapping
+    @Operation(summary = "获取当前登录用户")
+    public HttpResult<UserVo> getLogin() {
+        UserLocalDto login = userService.getLogin();
+        if (login == null) {
+            return HttpResult.failed(HttpCode.UN_AUTHORIZED, null);
+        }
+        return HttpResult.success(userService.getVoById(login.getId()));
+    }
+
     /**
      * 根据主键删除用户表
      *
