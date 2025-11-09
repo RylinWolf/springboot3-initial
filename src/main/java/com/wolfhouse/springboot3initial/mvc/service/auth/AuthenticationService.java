@@ -84,5 +84,13 @@ public interface AuthenticationService extends IService<Authentication> {
      * @return 返回对应的权限对象。如果未找到对应的权限信息，可能返回 null。
      */
     Authentication getAuthByCode(String authCode);
+
+    /**
+     * 根据指定的权限 ID 集合，批量查询权限信息及其子权限。
+     *
+     * @param authIds 权限 ID 集合，用于标识需要查询的权限。
+     * @return 返回包含指定权限及其子权限的列表。如果未找到对应的权限信息，可能返回空列表。
+     */
+    List<Authentication> getByIdsWithChild(List<Long> authIds);
     // endregion
 }

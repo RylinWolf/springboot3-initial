@@ -1,6 +1,8 @@
 package com.wolfhouse.springboot3initial.mvc.model.dto.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -10,6 +12,8 @@ import java.io.Serializable;
  * @author Rylin Wolf
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserLocalDto implements Serializable {
     private Long id;
     private String username;

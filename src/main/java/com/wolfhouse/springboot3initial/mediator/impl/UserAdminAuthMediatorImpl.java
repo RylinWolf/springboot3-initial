@@ -76,8 +76,8 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
         // 获取管理员的权限
         List<Long> authIds = JSONUtil.toList(adminService.getById(id)
                                                          .getAuthentication(), Long.class);
-        // 获取权限映射
-        return authService.getByIds(authIds);
+        // 获取权限及其子权限
+        return authService.getByIdsWithChild(authIds);
     }
 
     @Override

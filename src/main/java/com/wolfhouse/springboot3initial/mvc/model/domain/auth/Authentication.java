@@ -6,7 +6,9 @@ import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.core.keygen.KeyGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 /**
@@ -18,6 +20,8 @@ import org.springframework.security.core.GrantedAuthority;
 @Data
 @Schema(name = "权限表")
 @Table(value = "authentication")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Authentication implements GrantedAuthority {
     /**
      * 权限 ID
@@ -43,9 +47,27 @@ public class Authentication implements GrantedAuthority {
     @Schema(description = "描述")
     @Column(value = "description")
     private String description;
+    
+    public Authentication(String code) {
+        this.code = code;
+    }
 
     @Override
     public String getAuthority() {
         return this.code;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!GrantedAuthority.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+        GrantedAuthority auth = (GrantedAuthority) obj;
+        return this.code.equals(auth.getAuthority());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.code.hashCode();
     }
 }

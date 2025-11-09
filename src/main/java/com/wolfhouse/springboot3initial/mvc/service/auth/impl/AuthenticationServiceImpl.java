@@ -92,6 +92,15 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
                                   .eq(Authentication::getCode, authCode));
     }
 
+    @Override
+    public List<Authentication> getByIdsWithChild(List<Long> authIds) {
+        // 获取所有权限
+        List<Authentication> auths = getByIds(authIds);
+        // 获取所有子权限
+        auths.addAll(mapper.getChild(authIds));
+        return auths;
+    }
+
     // endregion
 
     @Override
