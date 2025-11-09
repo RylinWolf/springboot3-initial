@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
@@ -43,6 +44,7 @@ public class AuthenticationController {
 
         @Parameter(name = "description", description = "描述", required = true)
     })
+    @PreAuthorize("@pm.hasPerm('service:auth:add')")
     public boolean save(@RequestBody Authentication authentication) {
         return authenticationService.save(authentication);
     }
@@ -59,6 +61,7 @@ public class AuthenticationController {
     @Parameters(value = {
         @Parameter(name = "id", description = "权限 ID", required = true)
     })
+    @PreAuthorize("@pm.hasPerm('service:auth:delete')")
     public boolean remove(@PathVariable Serializable id) {
         return authenticationService.removeById(id);
     }
@@ -81,6 +84,7 @@ public class AuthenticationController {
 
         @Parameter(name = "description", description = "描述")
     })
+    @PreAuthorize("@pm.hasPerm('service:auth:update')")
     public boolean update(@RequestBody Authentication authentication) {
         return authenticationService.updateById(authentication);
     }
@@ -93,6 +97,7 @@ public class AuthenticationController {
      */
     @GetMapping("/list")
     @Operation(summary = "查询所有权限表")
+    @PreAuthorize("@pm.hasPerm('service:auth:query')")
     public List<Authentication> list() {
         return authenticationService.list();
     }
@@ -109,6 +114,7 @@ public class AuthenticationController {
     @Parameters(value = {
         @Parameter(name = "id", description = "权限 ID", required = true)
     })
+    @PreAuthorize("@pm.hasPerm('service:auth:query')")
     public Authentication getInfo(@PathVariable Serializable id) {
         return authenticationService.getById(id);
     }
@@ -126,6 +132,7 @@ public class AuthenticationController {
         @Parameter(name = "pageNumber", description = "页码", required = true),
         @Parameter(name = "pageSize", description = "每页大小", required = true)
     })
+    @PreAuthorize("@pm.hasPerm('service:auth:query')")
     public Page<Authentication> page(Page<Authentication> page) {
         return authenticationService.page(page);
     }

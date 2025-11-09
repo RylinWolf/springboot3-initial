@@ -92,5 +92,13 @@ public interface AuthenticationService extends IService<Authentication> {
      * @return 返回包含指定权限及其子权限的列表。如果未找到对应的权限信息，可能返回空列表。
      */
     List<Authentication> getByIdsWithChild(List<Long> authIds);
+
+    /**
+     * 检查指定的权限 ID 集合是否存在。
+     *
+     * @param ids 权限 ID 集合，用于标识需要检查的权限。
+     * @return 如果所有指定的权限 ID 都存在，返回 true；如果有任何一个权限 ID 不存在，返回 false。
+     */
+    Boolean areAuthIdsExist(Collection<Long> ids);
     // endregion
 }

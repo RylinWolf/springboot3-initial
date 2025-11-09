@@ -15,6 +15,7 @@ import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -83,6 +84,11 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
     @Override
     public UserLocalDto getLoginOrThrow() {
         return userService.getLoginOrThrow();
+    }
+
+    @Override
+    public Boolean areAuthIdsExist(Collection<Long> ids) {
+        return authService.areAuthIdsExist(ids);
     }
 
     // region 注册服务

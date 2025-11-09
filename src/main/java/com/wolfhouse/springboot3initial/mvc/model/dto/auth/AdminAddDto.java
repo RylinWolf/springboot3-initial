@@ -1,6 +1,5 @@
 package com.wolfhouse.springboot3initial.mvc.model.dto.auth;
 
-import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import lombok.Data;
 
 import java.util.List;
@@ -12,5 +11,5 @@ import java.util.List;
 public class AdminAddDto {
     private Long userId;
     private String adminName;
-    private List<Authentication> authentication;
+    private List<Long> authentication;
 }

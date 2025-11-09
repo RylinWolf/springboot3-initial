@@ -81,8 +81,10 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
                                      .exception(new ServiceException(HttpCode.PARAM_ERROR.code,
                                                                      AuthenticationConstant.ADMIN_NAME_EXIST))
                       // TODO 权限是否存在
+
                      )
                   .doVerify();
+
         // 2. 添加管理员
         Admin admin = BeanUtil.copyProperties(dto, Admin.class);
         // 添加失败则抛出异常

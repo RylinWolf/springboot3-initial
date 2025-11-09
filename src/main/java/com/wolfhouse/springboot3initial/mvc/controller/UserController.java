@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -85,8 +86,9 @@ public class UserController {
      */
     @DeleteMapping("/{id}")
     @Operation(summary = "用户删除")
-    public boolean remove(@PathVariable Long id) {
-        return userService.removeById(id);
+    @PreAuthorize("@pm.hasPerm('service:user:delete')")
+    public HttpResult<?> remove(@PathVariable Long id) {
+        return HttpResult.onCondition(HttpCode.UNKNOWN, userService.removeById(id));
     }
 
 
@@ -98,8 +100,8 @@ public class UserController {
      */
     @GetMapping("/{id}")
     @Operation(summary = "按 ID 获取用户 Vo")
-    public UserVo getInfo(@PathVariable Long id) {
-        return userService.getVoById(id);
+    public HttpResult<UserVo> getInfo(@PathVariable Long id) {
+        return HttpResult.failedIfBlank(userService.getVoById(id));
     }
 
 }

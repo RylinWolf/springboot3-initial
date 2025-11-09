@@ -1,5 +1,6 @@
 package com.wolfhouse.springboot3initial.mediator;
 
+import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
@@ -7,6 +8,7 @@ import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -67,13 +69,34 @@ public interface UserAdminAuthMediator {
     Boolean isAdminNameExist(String adminName);
 
     /**
+     * 尝试用户登录。
      *
-     * @param userLoginDto
-     * @return
+     * @param userLoginDto 包含登录信息的DTO对象，包括用户名和密码
+     * @return 如果登录成功，返回包含用户本地信息的DTO对象；如果登录失败，返回null
      */
     UserLocalDto tryLogin(UserLoginDto userLoginDto);
 
+    /**
+     * 获取指定管理员ID的所有权限。
+     *
+     * @param id 管理员的唯一标识符
+     * @return 返回该管理员拥有的所有权限列表
+     */
     List<Authentication> getAuthByAdminId(Long id);
 
+    /**
+     * 获取当前登录用户信息，如果未登录则抛出异常。
+     *
+     * @return 返回当前登录用户的本地信息DTO对象
+     * @throws ServiceException 如果用户未登录，则抛出异常
+     */
     UserLocalDto getLoginOrThrow();
+
+    /**
+     * 检查指定的权限ID集合是否都存在。
+     *
+     * @param t 需要检查的权限ID集合
+     * @return 如果所有权限ID都存在返回true，否则返回false
+     */
+    Boolean areAuthIdsExist(Collection<Long> t);
 }

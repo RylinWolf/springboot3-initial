@@ -1,10 +1,13 @@
 package com.wolfhouse.springboot3initial.mvc.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import com.wolfhouse.springboot3initial.common.result.HttpResult;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Admin;
+import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AdminAddDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
@@ -26,12 +29,13 @@ public class AdminController {
     /**
      * 添加 管理员表
      *
-     * @param admin 管理员表
-     * @return {@code true} 添加成功，{@code false} 添加失败
+     * @param dto 管理员添加 Dto
+     * @return 管理员视图对象
      */
-    @PostMapping("/save")
-    public boolean save(@RequestBody Admin admin) {
-        return adminService.save(admin);
+    @PostMapping
+    @PreAuthorize("@pm.hasPerm('service:admin:add')")
+    public HttpResult<Admin> add(@RequestBody AdminAddDto dto) throws Exception {
+        return HttpResult.failedIfBlank(adminService.addAdmin(dto));
     }
 
 
@@ -42,6 +46,7 @@ public class AdminController {
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
     @DeleteMapping("/remove/{id}")
+    @PreAuthorize("@pm.hasPerm('service:admin:delete')")
     public boolean remove(@PathVariable Serializable id) {
         return adminService.removeById(id);
     }
