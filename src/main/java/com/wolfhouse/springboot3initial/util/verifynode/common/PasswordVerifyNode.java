@@ -1,9 +1,9 @@
-package com.wolfhouse.springboot3initial.common.util.verify.servicenode.common;
+package com.wolfhouse.springboot3initial.util.verifynode.common;
 
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.StrLenVerifyNode;
-import com.wolfhouse.springboot3initial.common.util.verify.servicenode.ServiceVerifyConstant;
+import com.wolfhouse.springboot3initial.util.verifynode.ServiceVerifyConstant;
 
 /**
  * 密码验证节点

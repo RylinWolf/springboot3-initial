@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.common.util.verify.servicenode.user;
+package com.wolfhouse.springboot3initial.util.verifynode.user;
 
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;

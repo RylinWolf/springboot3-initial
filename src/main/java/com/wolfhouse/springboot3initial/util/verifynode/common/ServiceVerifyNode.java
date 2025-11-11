@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.common.util.verify.servicenode.common;
+package com.wolfhouse.springboot3initial.util.verifynode.common;
 
 /**
  * @author Rylin Wolf
