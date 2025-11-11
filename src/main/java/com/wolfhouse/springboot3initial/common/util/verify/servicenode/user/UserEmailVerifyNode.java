@@ -3,13 +3,13 @@ package com.wolfhouse.springboot3initial.common.util.verify.servicenode.user;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
-import com.wolfhouse.springboot3initial.common.util.verify.impl.BaseVerifyNode;
+import com.wolfhouse.springboot3initial.common.util.verify.impl.EmailVerifyNode;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 
 /**
  * @author Rylin Wolf
  */
-public class UserEmailVerifyNode extends BaseVerifyNode<String> {
+public class UserEmailVerifyNode extends EmailVerifyNode {
     private final UserAdminAuthMediator mediator;
 
     {
@@ -27,6 +27,7 @@ public class UserEmailVerifyNode extends BaseVerifyNode<String> {
         if (t == null) {
             return allowNull;
         }
-        return !mediator.isUserEmailExist(t);
+        // 格式验证 + 查重验证
+        return super.verify() && !mediator.isUserEmailExist(t);
     }
 }
