@@ -6,6 +6,7 @@ import com.wolfhouse.springboot3initial.common.result.HttpResult;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -110,6 +111,12 @@ public class UserController {
     @Operation(summary = "按 ID 获取用户 Vo")
     public HttpResult<UserVo> getInfo(@PathVariable Long id) {
         return HttpResult.failedIfBlank(userService.getVoById(id));
+    }
+
+    @PatchMapping
+    @Operation(summary = "更新用户")
+    public HttpResult<UserVo> update(@RequestBody UserUpdateDto dto) {
+        return HttpResult.failedIfBlank(userService.update(dto));
     }
 
 }
