@@ -33,7 +33,7 @@ create table if not exists `admin`
 (
     user_id          bigint primary key comment '用户 ID',
     admin_name       varchar(255) unique not null comment '管理员名称',
-    `authentication` text                null comment '管理权限，列表形式',
+    `authentication` text                null comment '管理权限，权限 ID 的列表形式 [2, 3, ...]',
     is_deleted       tinyint             not null default 0 comment '逻辑删除'
 ) comment '管理员表';
 

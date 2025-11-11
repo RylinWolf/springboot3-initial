@@ -48,9 +48,8 @@ public interface UserService extends IService<User> {
      *
      * @param dto 用户更新的传输对象，包含需要更新的字段值，例如用户名、邮箱等
      * @return 更新后的用户视图对象，包含用户的详细信息
-     * @throws Exception dto 参数验证失败时抛出异常
      */
-    UserVo update(UserUpdateDto dto) throws Exception;
+    UserVo update(UserUpdateDto dto);
 
     /**
      * 根据用户名生成账号。

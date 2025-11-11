@@ -67,18 +67,16 @@ public interface VerifyNode<T> {
      *
      * @param e 验证失败时要抛出的异常对象
      * @return 验证结果，验证通过返回true，验证失败则抛出指定的异常
-     * @throws Exception 验证失败时抛出的异常
      */
-    boolean verifyWithCustomE(Exception e) throws Exception;
+    boolean verifyWithCustomE(Exception e);
 
     /**
      * 执行验证操作并使用预设的自定义异常。
      * 使用预设的断言函数进行验证，验证失败时抛出预先设置的自定义异常。
      *
      * @return 验证结果，验证通过返回true，验证失败则抛出预设的异常
-     * @throws Exception 验证失败时抛出的异常
      */
-    boolean verifyWithCustomE() throws Exception;
+    boolean verifyWithCustomE();
 
 
     /**
@@ -86,9 +84,8 @@ public interface VerifyNode<T> {
      * 使用预设的断言函数进行验证，验证失败时抛出默认的验证异常。
      *
      * @return 验证结果，验证通过返回true，验证失败抛出异常
-     * @throws Exception 验证失败时抛出的默认验证异常
      */
-    boolean verifyWithE() throws Exception;
+    boolean verifyWithE();
 
     /**
      * 获取当前的异常对象。

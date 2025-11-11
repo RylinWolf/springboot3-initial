@@ -191,7 +191,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public UserVo update(UserUpdateDto dto) throws Exception {
+    public UserVo update(UserUpdateDto dto) {
         // 1. 获取当前登录用户
         // 未登录则抛出异常
         UserLocalDto user = getLoginOrThrow();

@@ -5,6 +5,7 @@ import com.wolfhouse.springboot3initial.common.util.verify.VerifyConstant;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyNode;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
+import lombok.SneakyThrows;
 
 import java.util.function.Predicate;
 
@@ -74,8 +75,9 @@ public abstract class BaseVerifyNode<T> implements VerifyNode<T> {
     }
 
 
+    @SneakyThrows
     @Override
-    public boolean verifyWithCustomE(Exception e) throws Exception {
+    public boolean verifyWithCustomE(Exception e) {
         this.customException = e;
         if (!verify()) {
             throw customException;
@@ -85,7 +87,7 @@ public abstract class BaseVerifyNode<T> implements VerifyNode<T> {
 
 
     @Override
-    public boolean verifyWithCustomE() throws Exception {
+    public boolean verifyWithCustomE() {
         if (customException == null) {
             return verifyWithE();
         }
@@ -93,7 +95,7 @@ public abstract class BaseVerifyNode<T> implements VerifyNode<T> {
     }
 
     @Override
-    public boolean verifyWithE() throws Exception {
+    public boolean verifyWithE() {
         return verifyWithCustomE(new VerifyException(VerifyConstant.VERIFY_FAILED));
     }
 

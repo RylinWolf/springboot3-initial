@@ -67,7 +67,7 @@ public class BaseVerifyChain implements VerifyChain {
     }
 
     @Override
-    public boolean doVerify() throws Exception {
+    public boolean doVerify() {
         for (VerifyNode<?> n : nodes) {
             var v = switch (n.getStrategy()) {
                 case NORMAL -> n.verify();
