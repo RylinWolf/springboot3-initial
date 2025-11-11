@@ -268,6 +268,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public String genAccount(String username) {
+        // 用户名统一转为小写
+        username = username.toLowerCase();
         String account = "%s#%s".formatted(username, RandomUtil.randomInt(100000, 1000000));
         // 查询帐号是否存在，若存在则重新生成，超出最大次数则抛出异常
         int maxReties = 10;

@@ -35,7 +35,8 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
 
     @Override
     public Boolean isUserEmailExist(String email) {
-        return userService.isUserEmailExist(email);
+        // 邮箱判断重复统一使用小写
+        return userService.isUserEmailExist(email.toLowerCase());
     }
 
     @Override
