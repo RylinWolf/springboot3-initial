@@ -62,6 +62,8 @@ public class AuthenticationServiceImpl extends ServiceImpl<AuthenticationMapper,
 
     @Override
     public Page<Authentication> queryBy(AuthenticationQueryDto dto) {
+
+
         QueryWrapper wrapper = QueryWrapper.create()
                                            .from(Authentication.class);
         // 权限标识

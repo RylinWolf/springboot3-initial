@@ -1,15 +1,16 @@
 package com.wolfhouse.springboot3initial.mvc.controller;
 
-import com.mybatisflex.core.paginate.Page;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
 import com.wolfhouse.springboot3initial.common.result.PageResult;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
+import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AuthenticationQueryDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -123,20 +124,10 @@ public class AuthenticationController {
     }
 
 
-    /**
-     * 分页查询权限表
-     *
-     * @param page 分页对象
-     * @return 分页对象
-     */
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "分页查询权限表")
-    @Parameters(value = {
-        @Parameter(name = "pageNumber", description = "页码", required = true),
-        @Parameter(name = "pageSize", description = "每页大小", required = true)
-    })
     @PreAuthorize("@pm.hasPerm('service:auth:query')")
-    public HttpResult<PageResult<Authentication>> page(Page<Authentication> page) {
-        return HttpResult.success(PageResult.ofPage(authenticationService.page(page)));
+    public HttpResult<PageResult<Authentication>> page(@RequestBody @Valid AuthenticationQueryDto dto) {
+        return HttpResult.success(PageResult.ofPage(authenticationService.queryBy(dto)));
     }
 }
