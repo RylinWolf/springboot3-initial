@@ -3,6 +3,7 @@ package com.wolfhouse.springboot3initial.mvc.controller;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
+import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
@@ -115,8 +116,16 @@ public class UserController {
 
     @Operation(summary = "更新用户")
     @PatchMapping
-    public HttpResult<UserVo> update(@RequestBody UserUpdateDto dto) {
-        return HttpResult.failedIfBlank(userService.update(dto));
+    public HttpResult<UserVo> update(@RequestBody UserUpdateDto dto, HttpServletRequest request) {
+        // 更新用户
+        UserVo vo = userService.update(dto);
+        // 更新成功，保存更新后的信息到 Session
+        if (vo != null) {
+            UserLocalDto localDto = BeanUtil.copyProperties(vo, UserLocalDto.class);
+            request.getSession()
+                   .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, localDto);
+        }
+        return HttpResult.failedIfBlank(vo);
     }
 
 }

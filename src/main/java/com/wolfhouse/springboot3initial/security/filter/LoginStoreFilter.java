@@ -57,7 +57,8 @@ public class LoginStoreFilter extends OncePerRequestFilter {
         // 初始化权限列表
         List<Authentication> authList = List.of();
         // 注入权限
-        if (loginUser.getIsAdmin()) {
+        if (mediator.isAdmin(loginUser.getId())) {
+            loginUser.setIsAdmin(true);
             authList = mediator.getAuthByAdminId(loginUser.getId());
         }
         // 2. 保存用户名密码认证类实例至安全上下文

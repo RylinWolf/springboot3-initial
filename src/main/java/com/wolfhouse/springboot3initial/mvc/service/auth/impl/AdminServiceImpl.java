@@ -64,13 +64,13 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     // endregion
 
     @Override
-    public Admin addAdmin(AdminAddDto dto) throws Exception {
+    public Admin addAdmin(AdminAddDto dto) {
         // 1. 检查参数
         // 获取登录用户
         UserLocalDto user = mediator.getLoginOrThrow();
         // 检查参数
         VerifyTool.of(
-                      // 登录用户是否为管理员
+                      // TODO 登录用户是否有权限
                       EmptyVerifyNode.of(user)
                                      .predicate(UserLocalDto::getIsAdmin)
                                      .exception(new ServiceException(HttpCode.NO_PERMISSION)),

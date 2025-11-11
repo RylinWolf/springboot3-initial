@@ -1,7 +1,6 @@
 package com.wolfhouse.springboot3initial.common.util.verify.servicenode.user;
 
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
-import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.EmailVerifyNode;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
@@ -14,7 +13,7 @@ public class UserEmailVerifyNode extends EmailVerifyNode {
 
     {
         setStrategy(VerifyStrategy.WITH_CUSTOM_EXCEPTION);
-        setCustomException(new VerifyException(UserConstant.EXIST_EMAIL));
+        this.exception(UserConstant.ILLEGAL_EMAIL);
     }
 
     public UserEmailVerifyNode(UserAdminAuthMediator mediator, String email) {
@@ -28,6 +27,10 @@ public class UserEmailVerifyNode extends EmailVerifyNode {
             return allowNull;
         }
         // 格式验证 + 查重验证
-        return super.verify() && !mediator.isUserEmailExist(t);
+        if (!super.verify()) {
+            return false;
+        }
+        this.exception(UserConstant.EXIST_EMAIL);
+        return !mediator.isUserEmailExist(t);
     }
 }
