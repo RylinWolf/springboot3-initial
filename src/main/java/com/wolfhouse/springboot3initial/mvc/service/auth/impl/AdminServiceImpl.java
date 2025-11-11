@@ -17,8 +17,9 @@ import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.mapper.auth.AdminMapper;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Admin;
 import com.wolfhouse.springboot3initial.mvc.model.dto.auth.AdminAddDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
+import com.wolfhouse.springboot3initial.security.PermissionConstant;
+import com.wolfhouse.springboot3initial.security.PermissionService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -66,14 +67,13 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     @Override
     public Admin addAdmin(AdminAddDto dto) {
         // 1. 检查参数
-        // 获取登录用户
-        UserLocalDto user = mediator.getLoginOrThrow();
+        // 检查权限
+        if (!PermissionService.hasPerm(PermissionConstant.ADMIN_ADD)) {
+            // 无权限
+            throw new ServiceException(HttpCode.NO_PERMISSION);
+        }
         // 检查参数
         VerifyTool.of(
-                      // TODO 登录用户是否有权限
-                      EmptyVerifyNode.of(user)
-                                     .predicate(UserLocalDto::getIsAdmin)
-                                     .exception(new ServiceException(HttpCode.NO_PERMISSION)),
                       // 用户是否存在
                       EmptyVerifyNode.of(dto.getUserId())
                                      .predicate(mediator::isUserExist)
