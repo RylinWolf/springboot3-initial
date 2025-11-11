@@ -12,11 +12,11 @@ import java.util.Map;
  */
 public class HttpMediaTypeConstant extends MediaType {
 
-    public static final MediaType APPLICATION_JSON_NULLABLE = new MediaType(
+    public static final MediaType APPLICATION_JSON_PATCH = new MediaType(
         "application",
-        "nullable+json",
+        "json-patch+json",
         StandardCharsets.UTF_8);
-    public static final String APPLICATION_JSON_NULLABLE_VALUE = "application/nullable+json";
+    public static final String APPLICATION_JSON_PATCH_VALUE = "application/json-patch+json";
 
     public HttpMediaTypeConstant(String type) {
         super(type);

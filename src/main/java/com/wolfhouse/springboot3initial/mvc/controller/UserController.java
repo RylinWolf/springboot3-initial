@@ -113,8 +113,8 @@ public class UserController {
         return HttpResult.failedIfBlank(userService.getVoById(id));
     }
 
-    @PatchMapping
     @Operation(summary = "更新用户")
+    @PatchMapping
     public HttpResult<UserVo> update(@RequestBody UserUpdateDto dto) {
         return HttpResult.failedIfBlank(userService.update(dto));
     }

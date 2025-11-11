@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -73,6 +75,30 @@ public class GlobalExceptionHandler {
         return HttpResult.failedWithStatus(HttpStatus.BAD_REQUEST.value(),
                                            HttpCode.BAD_REQUEST,
                                            e.getMessage());
+    }
+
+    @ExceptionHandler({HttpMediaTypeNotSupportedException.class, HttpMediaTypeNotAcceptableException.class})
+    public ResponseEntity<HttpResult<?>> mediaTypeException(Exception e) {
+        log.error("请求异常: {}", e.getMessage(), e);
+        int status;
+        HttpCode code;
+        switch (e.getClass()
+                 .getName()) {
+            case "org.springframework.web.HttpMediaTypeNotSupportedException" -> {
+                status = HttpStatus.UNSUPPORTED_MEDIA_TYPE.value();
+                code = HttpCode.UNSUPPORTED_MEDIA_TYPE;
+            }
+            case "org.springframework.web.HttpMediaTypeNotAcceptableException" -> {
+                status = HttpStatus.NOT_ACCEPTABLE.value();
+                code = HttpCode.MEDIA_TYPE_NOT_ACCEPTABLE;
+            }
+            default -> {
+                status = HttpStatus.BAD_REQUEST.value();
+                code = HttpCode.BAD_REQUEST;
+            }
+        }
+        ;
+        return HttpResult.failedWithStatus(status, code);
     }
 
     @ExceptionHandler

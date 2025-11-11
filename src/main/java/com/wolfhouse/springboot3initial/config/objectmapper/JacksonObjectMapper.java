@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.cfg.CoercionAction;
+import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -76,6 +78,10 @@ public class JacksonObjectMapper extends ObjectMapper {
         module.addDeserializer(LocalTime.class, LocalTimeDeserializer.INSTANCE);
 
         this.registerModule(module);
+
+        // 配置空字符串转换
+        this.coercionConfigDefaults()
+            .setCoercion(CoercionInputShape.EmptyString, CoercionAction.AsEmpty);
     }
 
     @Override

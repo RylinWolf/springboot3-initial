@@ -15,10 +15,11 @@ public enum HttpCode {
     PARAM_ERROR(40010, "参数错误"),
     UN_AUTHORIZED(40100, "未登录"),
     NO_PERMISSION(40311, "无操作权限"),
+    MEDIA_TYPE_NOT_ACCEPTABLE(40600, "不可接受的媒体类型"),
+    UNSUPPORTED_MEDIA_TYPE(41500, "不支持的媒体类型"),
     UNKNOWN(50099, "未知错误"),
     SQL_ERROR(50011, "SQL 错误"),
     ;
-
     public final int code;
     public final String message;
 

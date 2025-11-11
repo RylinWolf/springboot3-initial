@@ -208,11 +208,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 邮箱和用户名若与之前一样，则不修改
         if (user.getUsername()
-                .equals(username.get())) {
+                .equals(username.orElse(null))) {
             username = JsonNullable.undefined();
         }
         if (user.getEmail()
-                .equals(email.get())) {
+                .equals(email.orElse(null))) {
             email = JsonNullable.undefined();
         }
 

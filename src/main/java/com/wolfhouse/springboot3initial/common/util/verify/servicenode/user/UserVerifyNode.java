@@ -28,6 +28,7 @@ public class UserVerifyNode {
 
     public static StrLenVerifyNode status(String status) {
         return (StrLenVerifyNode) new StrLenVerifyNode(status)
+            .min(0L)
             .max(200L)
             .allowNull(true)
             .setStrategy(VerifyStrategy.WITH_CUSTOM_EXCEPTION)
