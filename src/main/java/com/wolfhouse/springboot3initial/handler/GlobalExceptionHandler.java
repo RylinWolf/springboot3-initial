@@ -12,12 +12,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.SQLSyntaxErrorException;
+import java.util.List;
 
 /**
  * 全局异常处理器
@@ -69,12 +72,40 @@ public class GlobalExceptionHandler {
         return HttpResult.failedWithStatus(code, httpCode, e.getMessage());
     }
 
-    @ExceptionHandler
-    public ResponseEntity<HttpResult<?>> verifyException(VerifyException e) {
-        log.error("字段校验异常: {}", e.getMessage(), e);
+    /**
+     * 处理字段验证和方法参数验证时抛出的异常。
+     *
+     * @param e 捕获的异常，可能是 VerifyException 或 MethodArgumentNotValidException
+     * @return 包含错误详情的响应实体
+     */
+    @ExceptionHandler({VerifyException.class, MethodArgumentNotValidException.class})
+    public ResponseEntity<HttpResult<?>> verifyException(Exception e) {
+        String msg;
+        // MethodArgumentNotValidException 的完整类路径
+        String methodNotValidClassPath = "org.springframework.web.bind.MethodArgumentNotValidException";
+
+        // 判断是否为方法参数验证异常
+        if (methodNotValidClassPath.equals(e.getClass()
+                                            .getName())) {
+            // 获取所有字段错误
+            List<FieldError> fieldErrors = ((MethodArgumentNotValidException) e).getFieldErrors();
+            StringBuilder msgBuilder = new StringBuilder();
+            // 构建错误信息，拼接所有字段错误
+            for (FieldError fieldError : fieldErrors) {
+                msgBuilder.append(fieldError.getField())
+                          .append(": ")
+                          .append(fieldError.getDefaultMessage())
+                          .append("; ");
+            }
+            msg = msgBuilder.toString();
+        } else {
+            // 对于 VerifyException，直接使用异常消息
+            msg = e.getMessage();
+        }
+        log.error("字段校验异常: {}", msg, e);
         return HttpResult.failedWithStatus(HttpStatus.BAD_REQUEST.value(),
                                            HttpCode.BAD_REQUEST,
-                                           e.getMessage());
+                                           msg);
     }
 
     @ExceptionHandler({HttpMediaTypeNotSupportedException.class, HttpMediaTypeNotAcceptableException.class})
