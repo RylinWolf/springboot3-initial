@@ -33,6 +33,8 @@ public interface UserService extends IService<User> {
     Boolean verify(String certificate, String password);
     // endregion
 
+    // region 业务方法
+
     /**
      * 创建用户。根据用户名称自动生成帐号并注入。
      * 返回创建后的用户对象。
@@ -63,6 +65,10 @@ public interface UserService extends IService<User> {
     String genAccount(String username);
 
     // region 查询用户
+
+    Boolean verify(Long id, String password);
+
+    Boolean verify(User user, String password);
 
     /**
      * 根据用户凭证获取用户信息。
@@ -114,5 +120,6 @@ public interface UserService extends IService<User> {
      * @return 如果账号对应的用户存在，则返回 true；否则返回 false
      */
     Boolean isUserAccountExist(String account);
+
     // endregion
 }

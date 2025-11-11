@@ -27,11 +27,11 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
+import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,9 +68,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public UserLocalDto getLogin() {
-        return (UserLocalDto) SecurityContextHolder.getContext()
-                                                   .getAuthentication()
-                                                   .getDetails();
+        return SecurityContextUtil.getLoginUser();
     }
 
     @Override
@@ -84,14 +82,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public Boolean verify(String certificate, String password) {
+        return verify(getByCertificate(certificate), password);
+    }
+
+    @Override
+    public Boolean verify(Long id, String password) {
+        return verify(getById(id), password);
+    }
+
+    @Override
+    public Boolean verify(User user, String password) {
         // 1. 获取用户
-        User user = getByCertificate(certificate);
         if (user == null) {
             return false;
         }
-        // 2. 获取用户验证信息
+        // 2. 获取用户密码密文
         UserAuth auth = userAuthMapper.selectOneById(user.getId());
-        // 3. 比对验证信息
+        // 3. 验证权限
         return passwordEncoder.matches(password, auth.getPasscode());
     }
 
@@ -217,7 +224,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 校验字段
-        // TODO 图片校验
+        // TODO 图片校验，自定义图片校验器
         VerifyTool.of(
                       // 生日
                       UserVerifyNode.birth(birth.orElse(null)),
