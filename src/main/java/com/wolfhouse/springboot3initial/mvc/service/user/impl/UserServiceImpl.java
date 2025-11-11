@@ -21,10 +21,7 @@ import com.wolfhouse.springboot3initial.mvc.mapper.user.UserAuthMapper;
 import com.wolfhouse.springboot3initial.mvc.mapper.user.UserMapper;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.UserAuth;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
@@ -289,6 +286,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new ServiceException(HttpCode.PARAM_ERROR, UserConstant.UNAVAILABLE_USERNAME);
         }
         return account;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updatePassword(UserPwdUpdateDto dto) {
+        // 1. 获取用户
+        Long userId = getLogin().getId();
+        User user = getById(userId);
+        // 2. 校验密码
+        // 旧密码校验
+        ThrowUtil.throwOnCondition(!verify(user, dto.getOldPassword()),
+                                   HttpCode.PARAM_ERROR.code,
+                                   UserConstant.VALID_FAILED);
+        // 新密码校验
+        VerifyTool.of(ServiceVerifyNode.password(dto.getNewPassword()))
+                  .doVerify();
+        // 3. 加密新密码并更新
+        String encode = passwordEncoder.encode(dto.getNewPassword());
+        userAuthMapper.update(UserAuth.builder()
+                                      .id(userId)
+                                      .passcode(encode)
+                                      .build(), true);
+        // 4. 获取新密码并验证，验证成功则更新成功
+        ThrowUtil.throwOnCondition(!verify(user, dto.getNewPassword()), HttpCode.UNKNOWN.message);
+        return true;
     }
 
 

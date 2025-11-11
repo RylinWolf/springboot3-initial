@@ -6,7 +6,10 @@ import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.core.keygen.KeyGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +22,9 @@ import java.time.LocalDateTime;
 @Data
 @Schema(name = "用户认证信息表")
 @Table(value = "user_auth")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UserAuth {
 
     /**

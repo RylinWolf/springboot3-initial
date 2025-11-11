@@ -4,10 +4,7 @@ package com.wolfhouse.springboot3initial.mvc.service.user;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserQueryDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 
 /**
@@ -63,6 +60,17 @@ public interface UserService extends IService<User> {
      * @return 根据提供的用户名生成的账号字符串
      */
     String genAccount(String username);
+
+
+    /**
+     * 更新用户密码。
+     * 根据提供的旧密码和新密码更新用户的登录密码。
+     *
+     * @param dto 包含用户旧密码和新密码的传输对象
+     * @return 该方法执行完成恒定返回 true，否则抛出异常
+     */
+    Boolean updatePassword(UserPwdUpdateDto dto);
+    // endregion
 
     // region 查询用户
 

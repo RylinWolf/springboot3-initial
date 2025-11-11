@@ -16,6 +16,7 @@ public class UserConstant {
     public static final String UNAVAILABLE_USERNAME = "该用户名不可用";
     public static final String LOGIN_FAILED = "用户名或密码不正确";
     public static final String USER_NOT_EXIST = "用户不存在";
+    public static final String VALID_FAILED = "验证失败";
 
     public static final String LOGIN_USER_SESSION_KEY = "loginUser";
 }

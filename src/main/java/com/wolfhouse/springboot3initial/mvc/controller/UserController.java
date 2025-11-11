@@ -4,10 +4,7 @@ import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserRegisterDto;
-import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserUpdateDto;
+import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -126,6 +123,15 @@ public class UserController {
                    .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, localDto);
         }
         return HttpResult.failedIfBlank(vo);
+    }
+
+    @PutMapping("/pwd")
+    @Operation(summary = "更新密码")
+    public HttpResult<?> updatePassword(@RequestBody UserPwdUpdateDto dto, HttpServletRequest request) {
+        Boolean b = userService.updatePassword(dto);
+        // 更新结束，使登录凭证失效
+        logout(request);
+        return HttpResult.success(b);
     }
 
 }
