@@ -6,6 +6,7 @@ target/
 
 ### CUSTOM ###
 temp/
+src/test
 
 
 ### STS ###
