@@ -43,15 +43,8 @@ public class GlobalExceptionHandler {
                                            HttpCode.NO_PERMISSION);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({SQLSyntaxErrorException.class, BadSqlGrammarException.class})
     public ResponseEntity<HttpResult<?>> sqlException(SQLSyntaxErrorException e) {
-        log.error("SQL 异常: {}", e.getMessage(), e);
-        return HttpResult.failedWithStatus(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                                           HttpCode.SQL_ERROR);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<HttpResult<?>> sqlException(BadSqlGrammarException e) {
         log.error("SQL 异常: {}", e.getMessage(), e);
         return HttpResult.failedWithStatus(HttpStatus.INTERNAL_SERVER_ERROR.value(),
                                            HttpCode.SQL_ERROR);
@@ -104,7 +97,7 @@ public class GlobalExceptionHandler {
         }
         log.error("字段校验异常: {}", msg, e);
         return HttpResult.failedWithStatus(HttpStatus.BAD_REQUEST.value(),
-                                           HttpCode.BAD_REQUEST,
+                                           HttpCode.PARAM_ERROR,
                                            msg);
     }
 
