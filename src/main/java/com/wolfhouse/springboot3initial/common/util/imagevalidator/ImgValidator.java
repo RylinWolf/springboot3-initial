@@ -34,19 +34,30 @@ public class ImgValidator {
     protected Set<String> allowedFormats;
     protected String contentTypePrefix;
 
+    /**
+     * ImgValidator 是一个用于校验图片文件合法性的工具类。支持校验图片的大小、宽高、像素总数、
+     * 格式以及文件的媒体类型等属性，适用于图片上传前的格式检查。
+     *
+     * @param maxSize           允许的图片文件最大大小（单位：字节）。当值小于 0 时，使用默认值 {@code IMAGE_MAX_SIZE}。值为 0 时不校验。
+     * @param maxWidth          图片的最大允许宽度（单位：像素）。当值小于 0 时，使用默认值 {@code IMAGE_MAX_WIDTH}。值为 0 时不校验。
+     * @param maxHeight         图片的最大允许高度（单位：像素）。当值小于 0 时，使用默认值 {@code IMAGE_MAX_HEIGHT}。值为 0 时不校验。
+     * @param maxPixels         图片的最大允许总像素数。当值小于 0 时，使用默认值 {@code MAX_PIXELS}。值为 0 时不校验。
+     * @param allowedFormats    允许的图片格式集合。当为 {@code null} 或为空集合时，使用默认值 {@code ALLOWED_FORMATS}。
+     * @param contentTypePrefix 文件的媒体类型前缀，用于限定允许的媒体类型。当为 {@code null} 时，使用默认值 {@code CONTENT_TYPE_PREFIX}。
+     */
     public ImgValidator(long maxSize,
                         int maxWidth,
                         int maxHeight,
                         long maxPixels,
                         Set<String> allowedFormats,
                         String contentTypePrefix) {
-        this.maxSize = maxSize <= 0 ? IMAGE_MAX_SIZE : maxSize;
-        this.maxWidth = maxWidth <= 0 ? IMAGE_MAX_WIDTH : maxWidth;
-        this.maxHeight = maxHeight <= 0 ? IMAGE_MAX_HEIGHT : maxHeight;
-        this.maxPixels = maxPixels <= 0 ? MAX_PIXELS : maxPixels;
+        this.maxSize = maxSize < 0 ? IMAGE_MAX_SIZE : maxSize;
+        this.maxWidth = maxWidth < 0 ? IMAGE_MAX_WIDTH : maxWidth;
+        this.maxHeight = maxHeight < 0 ? IMAGE_MAX_HEIGHT : maxHeight;
+        this.maxPixels = maxPixels < 0 ? MAX_PIXELS : maxPixels;
         this.allowedFormats = allowedFormats == null || allowedFormats.isEmpty() ? ALLOWED_FORMATS : allowedFormats;
         this.contentTypePrefix =
-            contentTypePrefix == null || contentTypePrefix.isEmpty() ? CONTENT_TYPE_PREFIX : contentTypePrefix;
+            contentTypePrefix == null ? CONTENT_TYPE_PREFIX : contentTypePrefix;
     }
 
     public ImgValidator() {
@@ -83,7 +94,7 @@ public class ImgValidator {
         if (size <= 0) {
             throw new ImgValidException(ImgValidConstant.INVALID_FILE_SIZE);
         }
-        if (size > maxSize) {
+        if (maxSize > 0 && size > maxSize) {
             throw new ImgValidException(ImgValidConstant.FILE_SIZE_MUST_LESS_THAN.formatted(maxSize + "字节"));
         }
         return size;
@@ -100,17 +111,19 @@ public class ImgValidator {
      * @throws ImgValidException 如果图片尺寸超出最大宽高限制，或像素总数超出最大允许值。
      */
     protected ArrayList<Integer> validScale(int width, int height) {
-
-
         if (width <= 0 || height <= 0) {
             throw new ImgValidException(ImgValidConstant.IMG_SCALE_INVALID);
         }
 
-        if (width > maxWidth || height > maxHeight) {
+        if (maxWidth > 0 && width > maxWidth) {
             throw new ImgValidException(ImgValidConstant.IMG_SCALE_MUST_LESS_THAN.formatted(maxWidth, maxHeight));
         }
 
-        if ((long) width * height > maxPixels) {
+        if (maxHeight > 0 && height > maxHeight) {
+            throw new ImgValidException(ImgValidConstant.IMG_SCALE_MUST_LESS_THAN.formatted(maxWidth, maxHeight));
+        }
+
+        if (maxPixels > 0 && (long) width * height > maxPixels) {
             throw new ImgValidException(ImgValidConstant.IMG_PIXELS_OVER);
         }
         return new ArrayList<>(List.of(width, height));
