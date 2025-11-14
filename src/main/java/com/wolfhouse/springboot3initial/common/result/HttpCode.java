@@ -16,6 +16,8 @@ public enum HttpCode {
     MEDIA_TYPE_NOT_ACCEPTABLE(40600, "不可接受的媒体类型"),
     UNSUPPORTED_MEDIA_TYPE(41500, "不支持的媒体类型"),
     SQL_ERROR(50011, "SQL 错误"),
+    IO_ERROR(50021, "IO 错误"),
+    OSS_UPLOAD_FAILED(50031, "OSS 上传出错"),
     UNKNOWN(50099, "未知错误"),
     ;
     public final int code;
