@@ -49,6 +49,7 @@ custom:
       endpoint: ${oss.aliyun.endpoint}
       region: ${oss.aliyun.region}
       avatar-bucket-name: ${oss.aliyun.avatar-bucket-name}
+      custom-endpoint: ${oss.aliyun.custom-endpoint:}
 
 
 # knife4j 文档配置

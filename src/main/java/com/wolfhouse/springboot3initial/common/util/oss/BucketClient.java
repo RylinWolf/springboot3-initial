@@ -18,6 +18,7 @@ public class BucketClient {
     private final String bucketName;
     /** 默认的存储路径前缀 */
     public String dirPrefix;
+    public String customEndpoint;
 
     public BucketClient(OSSClient ossClient, String bucketName) {
         this(ossClient, bucketName, "");
@@ -71,6 +72,27 @@ public class BucketClient {
     // endregion
 
     /**
+     * 获取文件上传路径。
+     * <p>
+     * 构建文件在存储服务中的完整上传路径，格式为：[自定义域名|桶名.域名]/目录前缀/文件名。
+     * 如果提供了自定义域名，则优先使用自定义域名；否则，使用桶名及默认域名。
+     *
+     * @param filename 文件名称，用于标识上传的目标文件
+     * @return 构建后的完整文件上传路径
+     */
+    public String getFileUploadPath(String filename) {
+        // [自定义域名|桶名.域名]/目录前缀/文件名
+        String endpoint = customEndpoint == null ? String.format("%s.%s", getBucketName(),
+                                                                 ossClient.getEndpoint()
+                                                                          .getHost())
+                                                 : customEndpoint;
+
+        return Path.of(endpoint, getDirPrefix(), filename)
+                   .toString();
+    }
+
+
+    /**
      * 上传指定的对象到存储桶中。
      * <p>
      * <b>注意，使用该方法时，dirPrefix 属性将不会生效</b>
@@ -106,29 +128,33 @@ public class BucketClient {
      *
      * @param filename 文件在存储桶中的目标路径（包含文件名称）
      * @param ins      要上传的输入流
+     * @param acl      文件访问权限
      * @return 返回存储桶完成文件上传后的结果信息
      */
-    public PutObjectResult putStream(String filename, InputStream ins, boolean overwrite) {
+    public PutObjectResult putStream(String filename, InputStream ins, boolean overwrite, CannedAccessControlList acl) {
         PutObjectRequest req = new PutObjectRequest(bucketName, buildPath(filename), ins);
         if (overwrite) {
             forbidOverwrite(req);
         }
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setObjectAcl(acl);
+        req.setMetadata(metadata);
         return ossClient.putObject(req);
     }
 
     public PutObjectResult putStream(String filename, InputStream ins) {
-        return putStream(filename, ins, false);
+        return putStream(filename, ins, false, CannedAccessControlList.Private);
     }
 
     /**
-     * 将字节数组形式的文件上传到指定的存储桶中。
+     * 将字节数组形式的文件上传到指定的存储桶中。默认权限为私有
      *
      * @param filename 文件在存储桶中的目标路径（包含文件名称）
      * @param bytes    要上传的字节数组
      * @return 返回存储桶完成文件上传后的结果信息
      */
     public PutObjectResult putBytes(String filename, byte[] bytes, boolean overwrite) {
-        return putStream(filename, new ByteArrayInputStream(bytes), overwrite);
+        return putStream(filename, new ByteArrayInputStream(bytes), overwrite, CannedAccessControlList.Private);
     }
 
     public PutObjectResult putBytes(String filename, byte[] bytes) {
