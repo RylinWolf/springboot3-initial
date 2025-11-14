@@ -3,7 +3,13 @@ server:
   servlet:
     context-path: /api
 
+
 spring:
+  # 激活配置文件
+  profiles:
+    # TODO 配置自己的配置文件
+    active: local
+
   # 数据库配置
   datasource:
     # TODO 配置自己的数据库
@@ -23,6 +29,7 @@ spring:
   session:
     # session 3 天过期
     timeout: 259200
+
 # 自定义配置
 custom:
   # 自定义日期格式配置
@@ -30,6 +37,12 @@ custom:
     date: yyyy-MM-dd
     datetime: yyyy-MM-dd HH:mm:ss
     time: HH:mm:ss
+
+  # OSS 配置
+  oss:
+    aliyun:
+      endpoint: ${oss.aliyun.endpoint}
+      region: ${oss.aliyun.region}
 
 # knife4j 文档配置
 # springdoc-openapi项目配置
