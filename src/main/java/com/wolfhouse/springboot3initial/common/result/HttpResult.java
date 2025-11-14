@@ -105,6 +105,16 @@ public class HttpResult<T> implements Serializable {
                              .body(HttpResult.failed(code));
     }
 
+
+    public static ResponseEntity<HttpResult<?>> failedWithStatus(HttpCode code, String msg) {
+        return failedWithStatus(Integer.parseInt(String.valueOf(code.code)
+                                                       .substring(0, 3)), code, msg);
+    }
+
+    public static ResponseEntity<HttpResult<?>> failedWithStatus(HttpCode code) {
+        return failedWithStatus(code, null);
+    }
+
     public static <T> ResponseEntity<HttpResult<T>> failedIfBlank(Integer httpStatus,
                                                                   HttpCode code,
                                                                   String message,
@@ -117,6 +127,10 @@ public class HttpResult<T> implements Serializable {
 
     public static <T> ResponseEntity<HttpResult<T>> ok(T data, String msg) {
         return ResponseEntity.ok(HttpResult.success(data, msg));
+    }
+
+    public static <T> ResponseEntity<HttpResult<T>> ok(T data) {
+        return ResponseEntity.ok(HttpResult.success(data));
     }
 
 
