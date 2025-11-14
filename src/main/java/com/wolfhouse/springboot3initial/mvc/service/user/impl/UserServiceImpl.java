@@ -8,6 +8,7 @@ import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.wolfhouse.springboot3initial.common.constant.OssUploadLogConstant;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
@@ -26,6 +27,7 @@ import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.UserAuth;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
+import com.wolfhouse.springboot3initial.mvc.service.OssUploadLogService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
 import com.wolfhouse.springboot3initial.util.verifynode.common.PhoneVerifyNode;
@@ -61,6 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final ImgValidator avatarValidator;
     private final BucketClient avatarOssClient;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final OssUploadLogService ossLogService;
 
     // region 初始化
 
@@ -270,7 +273,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 删除头像
             if (a == null) {
                 chain.set(User::getAvatar, null);
-                // TODO 删除头像对应的文件
                 return;
             }
             // 从缓存中读取头像地址
@@ -378,10 +380,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new ServiceException(HttpCode.PARAM_ERROR, UserConstant.AVATAR_VALID_FAILED);
         }
         // TODO 压缩图片大小
-        
+
         // 2. 生成文件名称
         // 通过登录用户 ID + 随机字符串生成
         String filename = genFilename(user.getId(), fileValid.format());
+        // 文件存储路径
+        String filepath = avatarOssClient.getFileUploadPath(filename);
+
         // 3. 上传文件
         // TODO Redis 获取已上传图片路径，判断是否有已经上传但没有使用的头像指纹，有则删除
         try (var ins = file.getInputStream()) {
@@ -391,9 +396,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (!avatarOssClient.doesObjectExist(filename)) {
                 throw new ServiceException(HttpCode.OSS_UPLOAD_FAILED);
             }
-            // TODO 可能文件上传后未设置权限，服务就宕机了
-            // 设置权限
-            avatarOssClient.setObjectPublicRead(filename);
+            // 记录上传日志
+            if (!ossLogService.log(filename, fileValid.size(), filepath)) {
+                log.error("{}: \nname: {}\npath: {}\nsize: {}\nuserId: {}",
+                          OssUploadLogConstant.FAIL_TO_LOG,
+                          filename,
+                          filepath,
+                          fileValid.size(),
+                          user.getId());
+            }
         } catch (IOException e) {
             log.error("{}: {}", ServiceExceptionConstant.PROCESS_FAILED, e.getMessage(), e);
             throw new ServiceException(HttpCode.IO_ERROR);
@@ -401,7 +412,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 4. 保存指纹与地址映射
         // 拼接上传路径：桶名称.域名 + 目录前缀 + 文件名
-        String filepath = avatarOssClient.getFileUploadPath(filename);
         String fingerprint = DigestUtil.md5Hex(filepath);
         // TODO 使用自定义 Redis 工具优化
         // 指纹 15 分钟有效

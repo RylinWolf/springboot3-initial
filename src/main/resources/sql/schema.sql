@@ -43,5 +43,18 @@ create table if not exists `authentication`
     parent_id     bigint comment '父权限 ID',
     `code`        varchar(255) unique not null comment '权限标识',
     `description` text                not null comment '描述',
-    index parent_id_idx (parent_id) comment '父权限索引'
+    index parent_id_idx (parent_id) comment '父权限索引',
+    fulltext index (`description`) comment '描述-全文索引'
 ) comment '权限表';
+
+
+create table if not exists `oss_upload_log`
+(
+    id            bigint primary key comment '日志 ID',
+    `filename`    varchar(255) not null comment '文件名',
+    `file_size`   bigint       not null comment '文件大小',
+    `file_path`   varchar(512) not null comment '文件路径',
+    `upload_user` bigint       not null comment '上传用户',
+    `upload_time` datetime default current_timestamp comment '上传时间',
+    index user_filename (upload_user, `filename`) comment '上传用户_文件名-联合索引'
+)
