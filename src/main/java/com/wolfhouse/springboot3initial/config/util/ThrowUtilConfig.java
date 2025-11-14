@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.config;
+package com.wolfhouse.springboot3initial.config.util;
 
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
