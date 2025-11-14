@@ -17,6 +17,8 @@ import org.springframework.context.annotation.Configuration;
 public class OssClientConfig {
     private String endpoint;
     private String region;
+    private String avatarBucketName;
+    
     private String accessKeyId = System.getenv("OSS_ACCESS_KEY_ID");
     private String accessKeySecret = System.getenv("OSS_ACCESS_KEY_SECRET");
 

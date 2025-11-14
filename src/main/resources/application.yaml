@@ -3,7 +3,6 @@ server:
   servlet:
     context-path: /api
 
-
 spring:
   # 激活配置文件
   profiles:
@@ -30,6 +29,12 @@ spring:
     # session 3 天过期
     timeout: 259200
 
+  servlet:
+    # 文件上传配置
+    multipart:
+      max-request-size: 5MB
+      max-file-size: 5MB
+
 # 自定义配置
 custom:
   # 自定义日期格式配置
@@ -43,6 +48,8 @@ custom:
     aliyun:
       endpoint: ${oss.aliyun.endpoint}
       region: ${oss.aliyun.region}
+      avatar-bucket-name: ${oss.aliyun.avatar-bucket-name}
+
 
 # knife4j 文档配置
 # springdoc-openapi项目配置
