@@ -5,4 +5,5 @@ package com.wolfhouse.springboot3initial.exception;
  */
 public interface ServiceExceptionConstant {
 
+    String PROCESS_FAILED = "执行失败";
 }

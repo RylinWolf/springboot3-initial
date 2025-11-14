@@ -3,9 +3,11 @@ package com.wolfhouse.springboot3initial.mvc.service.user;
 
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
+import com.wolfhouse.springboot3initial.common.util.imagevalidator.ImgValidException;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户表 服务层。
@@ -16,8 +18,18 @@ import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 public interface UserService extends IService<User> {
     // region 登录相关
 
+    /**
+     * 获取当前登录用户的信息。
+     *
+     * @return 当前登录用户的传输对象；如果用户未登录，则返回 null
+     */
     UserLocalDto getLogin();
 
+    /**
+     * 获取当前登录用户的信息。如果用户未登录，则抛出异常。
+     *
+     * @return 当前登录用户的传输对象
+     */
     UserLocalDto getLoginOrThrow();
 
     /**
@@ -70,12 +82,36 @@ public interface UserService extends IService<User> {
      * @return 该方法执行完成恒定返回 true，否则抛出异常
      */
     Boolean updatePassword(UserPwdUpdateDto dto);
+
+    /**
+     * 上传用户头像。
+     *
+     * @param file 需要上传的头像文件，文件类型应为支持的图片格式（如 JPEG、PNG 等）
+     * @return 上传成功后返回获取头像的指纹
+     * @throws ImgValidException 图像校验失败异常
+     */
+    String uploadAvatar(MultipartFile file) throws ImgValidException;
+
     // endregion
 
     // region 查询用户
 
+    /**
+     * 验证指定用户 ID 的密码是否正确。
+     *
+     * @param id       用户 ID，唯一标识一个用户
+     * @param password 待验证的密码
+     * @return 如果密码验证成功返回 true，否则返回 false
+     */
     Boolean verify(Long id, String password);
 
+    /**
+     * 验证指定用户对象的密码是否正确。
+     *
+     * @param user     用户对象，包含用户的完整信息
+     * @param password 待验证的密码
+     * @return 如果密码验证成功返回 true，否则返回 false
+     */
     Boolean verify(User user, String password);
 
     /**

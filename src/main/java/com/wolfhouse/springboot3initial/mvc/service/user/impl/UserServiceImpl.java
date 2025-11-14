@@ -1,6 +1,8 @@
 package com.wolfhouse.springboot3initial.mvc.service.user.impl;
 
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.digest.DigestUtil;
+import com.aliyun.oss.model.CannedAccessControlList;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryChain;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -11,8 +13,12 @@ import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
+import com.wolfhouse.springboot3initial.common.util.imagevalidator.ImgValidException;
+import com.wolfhouse.springboot3initial.common.util.imagevalidator.ImgValidator;
+import com.wolfhouse.springboot3initial.common.util.oss.BucketClient;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyTool;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
+import com.wolfhouse.springboot3initial.exception.ServiceExceptionConstant;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.mapper.user.UserAuthMapper;
 import com.wolfhouse.springboot3initial.mvc.mapper.user.UserMapper;
@@ -28,11 +34,16 @@ import com.wolfhouse.springboot3initial.util.verifynode.user.UserVerifyNode;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.openapitools.jackson.nullable.JsonNullable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
 
 import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserTableDef.USER;
@@ -40,12 +51,16 @@ import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserT
 /**
  * @author Rylin Wolf
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     private final UserAuthMapper userAuthMapper;
     private final PasswordEncoder passwordEncoder;
     private final UserAdminAuthMediator mediator;
+    private final ImgValidator avatarValidator;
+    private final BucketClient avatarOssClient;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     // region 初始化
 
@@ -159,6 +174,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
     // endregion
 
+    // region 业务方法
+
     @SneakyThrows
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -221,7 +238,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 校验字段
-        // TODO 图片校验，自定义图片校验器
         VerifyTool.of(
                       // 生日
                       UserVerifyNode.birth(birth.orElse(null)),
@@ -250,7 +266,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 邮箱
         email.ifPresent(e -> chain.set(User::getEmail, e));
         // 头像 可以为空
-        avatar.ifPresent(a -> chain.set(User::getAvatar, a, true));
+        avatar.ifPresent(a -> {
+            // 删除头像
+            if (a == null) {
+                chain.set(User::getAvatar, null);
+                // TODO 删除头像对应的文件
+                return;
+            }
+            // 从缓存中读取头像地址
+            String avatarPath = (String) redisTemplate.opsForValue()
+                                                      .getAndDelete("service:user:avatar_%s".formatted(a));
+            // 头像地址有效，进行更新
+            if (avatarPath != null) {
+                chain.set(User::getAvatar, avatarPath);
+            }
+        });
         // 生日 可以为空
         birth.ifPresent(b -> chain.set(User::getBirth, b, true));
         // 性别 可以为空
@@ -288,6 +318,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return account;
     }
 
+    /**
+     * 生成唯一的文件名，格式为 userId_随机字符串.格式。若生成的文件名已存在，
+     * 则重新生成，直到文件名唯一或达到最大重试次数。
+     *
+     * @param userId 用户ID，用于文件名前缀。
+     * @param format 文件格式，例如 "jpg"、"png"。
+     * @return 生成的唯一文件名。
+     * @throws ServiceException 如果在达到最大重试次数后仍无法生成唯一文件名，抛出此异常。
+     */
+    private String genFilename(Long userId, String format) {
+        String filename = String.format("%s_%s.%s", userId, RandomUtil.randomString(16), format);
+        int maxReties = 10;
+        // 文件是否已存在，若已存在则重新生成名称
+        while (avatarOssClient.doesObjectExist(filename) && maxReties-- > 0) {
+            filename = String.format("%s_%s.%s", userId, RandomUtil.randomString(16), format);
+        }
+        if (maxReties <= 0) {
+            // 超出最大重试次数
+            throw new ServiceException(HttpCode.OSS_UPLOAD_FAILED);
+        }
+        return filename;
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean updatePassword(UserPwdUpdateDto dto) {
@@ -313,5 +366,52 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return true;
     }
 
+    @Override
+    public String uploadAvatar(MultipartFile file) throws ImgValidException {
+        // 0. 校验登录信息
+        UserLocalDto user = getLoginOrThrow();
+        // 1. 校验文件
+        ImgValidator.Result fileValid = avatarValidator.validate(file);
+        if (!fileValid.valid()) {
+            // 解析图片失败
+            log.error("{}: {}", UserConstant.AVATAR_VALID_FAILED, fileValid.message());
+            throw new ServiceException(HttpCode.PARAM_ERROR, UserConstant.AVATAR_VALID_FAILED);
+        }
+        // TODO 压缩图片大小
+        
+        // 2. 生成文件名称
+        // 通过登录用户 ID + 随机字符串生成
+        String filename = genFilename(user.getId(), fileValid.format());
+        // 3. 上传文件
+        // TODO Redis 获取已上传图片路径，判断是否有已经上传但没有使用的头像指纹，有则删除
+        try (var ins = file.getInputStream()) {
+            // 上传文件，可公开读
+            avatarOssClient.putStream(filename, ins, false, CannedAccessControlList.PublicRead);
+            // 文件不存在
+            if (!avatarOssClient.doesObjectExist(filename)) {
+                throw new ServiceException(HttpCode.OSS_UPLOAD_FAILED);
+            }
+            // TODO 可能文件上传后未设置权限，服务就宕机了
+            // 设置权限
+            avatarOssClient.setObjectPublicRead(filename);
+        } catch (IOException e) {
+            log.error("{}: {}", ServiceExceptionConstant.PROCESS_FAILED, e.getMessage(), e);
+            throw new ServiceException(HttpCode.IO_ERROR);
+        }
+
+        // 4. 保存指纹与地址映射
+        // 拼接上传路径：桶名称.域名 + 目录前缀 + 文件名
+        String filepath = avatarOssClient.getFileUploadPath(filename);
+        String fingerprint = DigestUtil.md5Hex(filepath);
+        // TODO 使用自定义 Redis 工具优化
+        // 指纹 15 分钟有效
+        redisTemplate.opsForValue()
+                     .set("service:user:avatar_%s".formatted(fingerprint), filepath, Duration.ofMinutes(15));
+
+        // 5. 返回指纹
+        return fingerprint;
+    }
+
+    // endregion
 
 }

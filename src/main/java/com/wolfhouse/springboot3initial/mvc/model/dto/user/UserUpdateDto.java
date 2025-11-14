@@ -27,6 +27,7 @@ public class UserUpdateDto {
      */
     @Schema(example = "https://example.com/avatar.jpg",
             type = "string",
+            description = "用户头像的指纹，需要先上传头像才可更新",
             nullable = true)
     private JsonNullable<String> avatar = JsonNullable.undefined();
 

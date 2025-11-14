@@ -4,6 +4,7 @@ import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
+import com.wolfhouse.springboot3initial.common.util.imagevalidator.ImgValidException;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
@@ -13,11 +14,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 用户表 控制层。
@@ -123,6 +126,18 @@ public class UserController {
                    .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, localDto);
         }
         return HttpResult.failedIfBlank(vo);
+    }
+
+    @PostMapping("/avatar")
+    @Operation(summary = "上传头像")
+    public ResponseEntity<? extends HttpResult<?>> uploadAvatar(@RequestParam("avatar") MultipartFile avatar) {
+        String fingerprint;
+        try {
+            fingerprint = userService.uploadAvatar(avatar);
+        } catch (ImgValidException e) {
+            return HttpResult.failedWithStatus(HttpCode.PARAM_ERROR, e.getMessage());
+        }
+        return HttpResult.ok(fingerprint);
     }
 
     @PutMapping("/pwd")

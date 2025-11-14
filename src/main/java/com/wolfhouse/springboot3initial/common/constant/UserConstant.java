@@ -1,5 +1,7 @@
 package com.wolfhouse.springboot3initial.common.constant;
 
+import java.util.Set;
+
 /**
  * @author Rylin Wolf
  */
@@ -19,4 +21,7 @@ public class UserConstant {
     public static final String VALID_FAILED = "验证失败";
 
     public static final String LOGIN_USER_SESSION_KEY = "loginUser";
+
+    public static final Set<String> ALLOWED_AVATAR_TYPE = Set.of("jpg", "jpeg", "png");
+    public static final String AVATAR_VALID_FAILED = "头像验证失败";
 }
