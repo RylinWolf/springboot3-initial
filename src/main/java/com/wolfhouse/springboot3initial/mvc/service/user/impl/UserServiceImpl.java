@@ -14,6 +14,7 @@ import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
+import com.wolfhouse.springboot3initial.common.util.imageutil.ImgCompressor;
 import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidException;
 import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidator;
 import com.wolfhouse.springboot3initial.common.util.oss.BucketClient;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -379,36 +381,54 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.error("{}: {}", UserConstant.AVATAR_VALID_FAILED, fileValid.message());
             throw new ServiceException(HttpCode.PARAM_ERROR, UserConstant.AVATAR_VALID_FAILED);
         }
-        // TODO 压缩图片大小
 
         // 2. 生成文件名称
         // 通过登录用户 ID + 随机字符串生成
-        String filename = genFilename(user.getId(), fileValid.format());
+        String filename = genFilename(user.getId(), UserConstant.AVATAR_FORMAT);
         // 文件存储路径
         String filepath = avatarOssClient.getFileUploadPath(filename);
-
+        // 文件字节输入流
+        ByteArrayInputStream imgIns;
         // 3. 上传文件
-        // TODO Redis 获取已上传图片路径，判断是否有已经上传但没有使用的头像指纹，有则删除
         try (var ins = file.getInputStream()) {
-            // 上传文件，可公开读
-            avatarOssClient.putStream(filename, ins, false, CannedAccessControlList.PublicRead);
-            // 文件不存在
-            if (!avatarOssClient.doesObjectExist(filename)) {
-                throw new ServiceException(HttpCode.OSS_UPLOAD_FAILED);
+            // TODO Redis 获取已上传图片路径，判断是否有已经上传但没有使用的头像指纹，有则删除
+
+            // 3.1 压缩图片大小
+            // 构建压缩器
+            ImgCompressor compressor = ImgCompressor.of(ins);
+            // 判断是否需要压缩质量
+            if (fileValid.size() > UserConstant.AVATAR_COMPRESS_SIZE) {
+                compressor.quality(UserConstant.AVATAR_COMPRESS_QUALITY);
             }
-            // 记录上传日志
-            if (!ossLogService.log(filename, fileValid.size(), filepath)) {
-                log.error("{}: \nname: {}\npath: {}\nsize: {}\nuserId: {}",
-                          OssUploadLogConstant.FAIL_TO_LOG,
-                          filename,
-                          filepath,
-                          fileValid.size(),
-                          user.getId());
-            }
+            // 压缩宽高
+            compressor.scale(UserConstant.AVATAR_MAX_WIDTH, UserConstant.AVATAR_MAX_HEIGHT);
+            // 转换格式
+            compressor.format(UserConstant.AVATAR_FORMAT);
+            // 执行压缩，获取字节并转为字节流
+            imgIns = new ByteArrayInputStream(compressor.doCompress()
+                                                        .toByteArray());
+
         } catch (IOException e) {
             log.error("{}: {}", ServiceExceptionConstant.PROCESS_FAILED, e.getMessage(), e);
             throw new ServiceException(HttpCode.IO_ERROR);
         }
+        // 3.2 上传文件
+        // 上传文件，可公开读
+        avatarOssClient.putStream(filename, imgIns, false, CannedAccessControlList.PublicRead);
+        // 文件不存在
+        if (!avatarOssClient.doesObjectExist(filename)) {
+            throw new ServiceException(HttpCode.OSS_UPLOAD_FAILED);
+        }
+        // 记录上传日志
+        if (!ossLogService.log(filename, fileValid.size(), filepath)) {
+            log.error("{}: \nname: {}\npath: {}\nsize: {}\nuserId: {}",
+                      OssUploadLogConstant.FAIL_TO_LOG,
+                      filename,
+                      filepath,
+                      fileValid.size(),
+                      user.getId());
+        }
+
 
         // 4. 保存指纹与地址映射
         // 拼接上传路径：桶名称.域名 + 目录前缀 + 文件名
