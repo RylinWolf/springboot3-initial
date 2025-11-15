@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.common.util.imagevalidator;
+package com.wolfhouse.springboot3initial.common.util.imageutil;
 
 /**
  * @author Rylin Wolf

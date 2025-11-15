@@ -3,7 +3,7 @@ package com.wolfhouse.springboot3initial.mvc.service.user;
 
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
-import com.wolfhouse.springboot3initial.common.util.imagevalidator.ImgValidException;
+import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidException;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;

@@ -4,7 +4,7 @@ import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
-import com.wolfhouse.springboot3initial.common.util.imagevalidator.ImgValidException;
+import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidException;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;

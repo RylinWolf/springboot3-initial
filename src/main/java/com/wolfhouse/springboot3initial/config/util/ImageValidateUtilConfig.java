@@ -1,7 +1,7 @@
 package com.wolfhouse.springboot3initial.config.util;
 
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
-import com.wolfhouse.springboot3initial.common.util.imagevalidator.ImgValidator;
+import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
