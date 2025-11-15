@@ -1,5 +1,6 @@
 package com.wolfhouse.springboot3initial.config.util;
 
+import com.wolfhouse.springboot3initial.common.util.redisutil.RedisKeyUtil;
 import com.wolfhouse.springboot3initial.common.util.redisutil.RedisUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,5 +14,10 @@ public class RedisUtilConfig {
     @Bean
     public RedisUtil redisUtil(RedisTemplate<String, Object> template) {
         return new RedisUtil(template);
+    }
+
+    @Bean
+    public RedisKeyUtil redisKeyUtil() {
+        return new RedisKeyUtil(null, null);
     }
 }

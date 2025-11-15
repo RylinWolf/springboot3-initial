@@ -18,6 +18,9 @@ import com.wolfhouse.springboot3initial.common.util.imageutil.ImgCompressor;
 import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidException;
 import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidator;
 import com.wolfhouse.springboot3initial.common.util.oss.BucketClient;
+import com.wolfhouse.springboot3initial.common.util.redisutil.RedisKey;
+import com.wolfhouse.springboot3initial.common.util.redisutil.RedisKeyUtil;
+import com.wolfhouse.springboot3initial.common.util.redisutil.RedisUtil;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyTool;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.exception.ServiceExceptionConstant;
@@ -39,7 +42,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,14 +60,19 @@ import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserT
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@RedisKey(secondPrefix = "user")
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     private final UserAuthMapper userAuthMapper;
     private final PasswordEncoder passwordEncoder;
     private final UserAdminAuthMediator mediator;
     private final ImgValidator avatarValidator;
     private final BucketClient avatarOssClient;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final OssUploadLogService ossLogService;
+    private final RedisUtil redisUtil;
+    private final RedisKeyUtil redisKeyUtil;
+
+    @RedisKey(name = "avatar_%s")
+    public String avatarRedisKey = "userAvatar";
 
     // region 初始化
 
@@ -278,8 +285,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 return;
             }
             // 从缓存中读取头像地址
-            String avatarPath = (String) redisTemplate.opsForValue()
-                                                      .getAndDelete("service:user:avatar_%s".formatted(a));
+            String avatarPath = (String) redisUtil.getValueAndDelete(redisKeyUtil.getKey(avatarRedisKey.formatted(a)));
             // 头像地址有效，进行更新
             if (avatarPath != null) {
                 chain.set(User::getAvatar, avatarPath);
@@ -405,6 +411,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 转换格式
             compressor.format(UserConstant.AVATAR_FORMAT);
             // 执行压缩，获取字节并转为字节流
+            // TODO 不同图片大小使用不同压缩比例
             imgIns = new ByteArrayInputStream(compressor.doCompress()
                                                         .toByteArray());
 
@@ -433,11 +440,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 4. 保存指纹与地址映射
         // 拼接上传路径：桶名称.域名 + 目录前缀 + 文件名
         String fingerprint = DigestUtil.md5Hex(filepath);
-        // TODO 使用自定义 Redis 工具优化
         // 指纹 15 分钟有效
-        redisTemplate.opsForValue()
-                     .set("service:user:avatar_%s".formatted(fingerprint), filepath, Duration.ofMinutes(15));
-
+        // 使用自定义 Redis 工具优化
+        redisUtil.setValueExpire(redisKeyUtil.getKey(avatarRedisKey)
+                                             .formatted(fingerprint), filepath, Duration.ofMinutes(15));
         // 5. 返回指纹
         return fingerprint;
     }
