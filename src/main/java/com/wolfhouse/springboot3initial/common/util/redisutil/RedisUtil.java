@@ -1,11 +1,11 @@
 package com.wolfhouse.springboot3initial.common.util.redisutil;
 
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.SetOperations;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.core.ZSetOperations;
+import lombok.NonNull;
+import org.springframework.data.redis.core.*;
 
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 操作 Redis 的工具类
@@ -25,111 +25,135 @@ public class RedisUtil {
         this.opsForZSet = redisTemplate.opsForZSet();
     }
 
-    public Long getAndIncrease(String key, int value) {
+    public Long getAndIncrease(@NonNull String key, int value) {
         return opsForValue.increment(key, value);
     }
 
-    public Long getAndDecrease(String key, int value) {
+    public Long getAndDecrease(@NonNull String key, int value) {
         return opsForValue.decrement(key, value);
     }
 
     // region set 方法
 
-    public void addSetValue(String key, Object value) {
+    public void addSetValue(@NonNull String key, Object value) {
         opsForSet.add(key, value);
     }
 
-    public void addSetValueExpire(String key, Object value, Duration duration) {
+    public void addSetValueExpire(@NonNull String key, Object value, Duration duration) {
         opsForSet.add(key, value, duration);
     }
 
-    public void removeSetValue(String key, Object value) {
+    public void removeSetValue(@NonNull String key, Object value) {
         opsForSet.remove(key, value);
     }
 
-    public Object popSetValue(String key, Object value) {
+    public Object popSetValue(@NonNull String key, Object value) {
         return opsForSet.pop(key);
     }
 
-    public Long sizeOfSetValue(String key) {
+    public Long sizeOfSetValue(@NonNull String key) {
         return opsForSet.size(key);
     }
 
-    public Boolean isSetValueMember(String key, Object value) {
+    public Boolean isSetValueMember(@NonNull String key, Object value) {
         return opsForSet.isMember(key, value);
     }
 
-    public Boolean addZSetValue(String key, Object value, double score) {
+    public Boolean addZSetValue(@NonNull String key, Object value, double score) {
         return opsForZSet.add(key, value, score);
     }
 
-    public Long removeZSetValue(String key) {
+    public Long removeZSetValue(@NonNull String key) {
         return opsForZSet.remove(key);
     }
 
-    public Double incrementZSetValue(String key, Object value, double score) {
+    public Double incrementZSetValue(@NonNull String key, Object value, double score) {
         return opsForZSet.incrementScore(key, value, score);
     }
 
 
     // endregion
 
-
     // region value 方法
 
     // TODO
 
-    public void setValue(String key, Object value) {
+    public void setValue(@NonNull String key, Object value) {
         this.opsForValue.set(key, value);
     }
 
-    public void setValueExpire(String key, Object value, Duration duration) {
+    public void setValueExpire(@NonNull String key, Object value, Duration duration) {
         this.opsForValue.set(key, value, duration);
     }
 
-    public void setExpire(String key, Duration duration) {
+    public void setExpire(@NonNull String key, Duration duration) {
         this.redisTemplate.expire(key, duration);
     }
 
-    public Boolean setValueIfAbsent(String key, Object value) {
+    public Boolean setValueIfAbsent(@NonNull String key, Object value) {
         return this.opsForValue.setIfAbsent(key, value);
     }
 
-    public Object getValue(String key) {
+    public Object getValue(@NonNull String key) {
         return this.opsForValue.get(key);
     }
 
-    public Object getValueAndExpire(String key, Duration duration) {
+    public Object getValueAndExpire(@NonNull String key, Duration duration) {
         Object value = this.opsForValue.get(key);
         this.redisTemplate.expire(key, duration);
         return value;
     }
 
-    public Object getValueAndDelete(String key) {
+    public Object getValueAndDelete(@NonNull String key) {
         return opsForValue.getAndDelete(key);
     }
 
-    public Boolean deleteValue(String key) {
+    public Boolean deleteValue(@NonNull String key) {
         return this.redisTemplate.delete(key);
     }
 
-    public Boolean isKeyExist(String key) {
+    public Boolean isKeyExist(@NonNull String key) {
         return this.redisTemplate.hasKey(key);
     }
+
     // endregion
 
     // region 内置方法
 
-    public Boolean hasKey(String key) {
+    public Boolean hasKey(@NonNull String key) {
         return redisTemplate.hasKey(key);
     }
 
-    public Boolean delete(String key) {
+    public Boolean delete(@NonNull String key) {
         return redisTemplate.delete(key);
     }
 
-    public Boolean expire(String key, Duration duration) {
+    public Boolean expire(@NonNull String key, Duration duration) {
         return redisTemplate.expire(key, duration);
     }
+    // endregion'
+
+    // region 键匹配
+
+    /**
+     * 扫描 Redis 数据库中与指定匹配模式相符的键。
+     *
+     * @param pattern 匹配模式，支持通配符，例如 "user:*"。
+     * @param count   每次扫描的最大数量，控制扫描结果的批次大小。
+     * @return 返回匹配的键值集合。
+     */
+    public Set<String> keysMatch(@NonNull String pattern, int count) {
+        HashSet<String> keys = new HashSet<>();
+        try (Cursor<String> cursor = redisTemplate.scan(ScanOptions.scanOptions()
+                                                                   .match(pattern)
+                                                                   .count(count)
+                                                                   .build())) {
+            while (cursor.hasNext()) {
+                keys.add(cursor.next());
+            }
+        }
+        return keys;
+    }
+
     // endregion
 }
