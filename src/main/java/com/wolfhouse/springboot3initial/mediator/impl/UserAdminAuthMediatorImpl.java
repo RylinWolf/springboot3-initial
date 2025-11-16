@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Rylin Wolf
@@ -151,6 +152,11 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
         User user = userService.getById(getLoginOrThrow().getId());
         user.setLoginDate(time);
         return userService.updateById(user);
+    }
+
+    @Override
+    public Long updateAccessedTime(Map<Long, LocalDateTime> lastLogins) {
+        return userService.updateAccessedTime(lastLogins);
     }
 
     // region 注册服务

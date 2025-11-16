@@ -9,6 +9,9 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.util.Map;
+
 /**
  * 用户表 服务层。
  *
@@ -164,6 +167,14 @@ public interface UserService extends IService<User> {
      * @return 如果账号对应的用户存在，则返回 true；否则返回 false
      */
     Boolean isUserAccountExist(String account);
+
+    /**
+     * 更新用户的最近访问时间。
+     *
+     * @param lastLogins 包含用户 ID 和对应最后访问时间的映射表，键为用户 ID，值为最后访问时间
+     * @return 更新数量
+     */
+    Long updateAccessedTime(Map<Long, LocalDateTime> lastLogins);
 
     // endregion
 }

@@ -19,8 +19,6 @@ import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidException;
 import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidator;
 import com.wolfhouse.springboot3initial.common.util.oss.BucketClient;
 import com.wolfhouse.springboot3initial.common.util.redisutil.RedisKey;
-import com.wolfhouse.springboot3initial.common.util.redisutil.RedisKeyUtil;
-import com.wolfhouse.springboot3initial.common.util.redisutil.RedisUtil;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyTool;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.exception.ServiceExceptionConstant;
@@ -34,6 +32,8 @@ import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.OssUploadLogService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
+import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
+import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
 import com.wolfhouse.springboot3initial.util.verifynode.common.PhoneVerifyNode;
 import com.wolfhouse.springboot3initial.util.verifynode.common.ServiceVerifyNode;
 import com.wolfhouse.springboot3initial.util.verifynode.user.UserVerifyNode;
@@ -51,6 +51,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Map;
 
 import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserTableDef.USER;
 
@@ -68,11 +70,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final ImgValidator avatarValidator;
     private final BucketClient avatarOssClient;
     private final OssUploadLogService ossLogService;
-    private final RedisUtil redisUtil;
-    private final RedisKeyUtil redisKeyUtil;
-
-    @RedisKey(name = "avatar_%s")
-    public String avatarRedisKey = "userAvatar";
+    private final ServiceRedisUtil redisUtil;
 
     // region 初始化
 
@@ -184,6 +182,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return exists(QueryWrapper.create()
                                   .eq(User::getAccount, account, true));
     }
+
+    @Override
+    public Long updateAccessedTime(Map<Long, LocalDateTime> lastLogins) {
+        return mapper.updateAccessedTimeByMap(lastLogins);
+    }
     // endregion
 
     // region 业务方法
@@ -285,7 +288,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 return;
             }
             // 从缓存中读取头像地址
-            String avatarPath = (String) redisUtil.getValueAndDelete(redisKeyUtil.getKey(avatarRedisKey.formatted(a)));
+            String avatarPath = (String) redisUtil.getValueAndDelete(UserRedisConstant.USER_AVATAR, user.getId());
             // 头像地址有效，进行更新
             if (avatarPath != null) {
                 chain.set(User::getAvatar, avatarPath);
@@ -442,8 +445,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String fingerprint = DigestUtil.md5Hex(filepath);
         // 指纹 15 分钟有效
         // 使用自定义 Redis 工具优化
-        redisUtil.setValueExpire(redisKeyUtil.getKey(avatarRedisKey)
-                                             .formatted(fingerprint), filepath, Duration.ofMinutes(15));
+        redisUtil.setValueExpire(UserRedisConstant.USER_AVATAR, filepath, Duration.ofMinutes(15), fingerprint);
         // 5. 返回指纹
         return fingerprint;
     }

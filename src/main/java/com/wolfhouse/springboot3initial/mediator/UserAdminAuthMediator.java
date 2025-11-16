@@ -11,6 +11,7 @@ import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Rylin Wolf
@@ -108,4 +109,12 @@ public interface UserAdminAuthMediator {
      * @return 如果更新成功，返回 {@code true}；否则返回 {@code false}
      */
     Boolean updateAccessedTime(LocalDateTime time);
+
+    /**
+     * 更新用户会话的最后访问时间。
+     *
+     * @param lastLogins 一个映射，将用户的唯一标识符（用户ID）映射到对应的最后访问时间（{@code LocalDateTime}）。
+     * @return 更新条数
+     */
+    Long updateAccessedTime(Map<Long, LocalDateTime> lastLogins);
 }
