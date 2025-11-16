@@ -18,6 +18,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.sql.SQLSyntaxErrorException;
 import java.util.List;
@@ -71,29 +72,38 @@ public class GlobalExceptionHandler {
      * @param e 捕获的异常，可能是 VerifyException 或 MethodArgumentNotValidException
      * @return 包含错误详情的响应实体
      */
-    @ExceptionHandler({VerifyException.class, MethodArgumentNotValidException.class})
+    @ExceptionHandler({VerifyException.class,
+                       MethodArgumentNotValidException.class,
+                       MissingServletRequestPartException.class
+    })
     public ResponseEntity<HttpResult<?>> verifyException(Exception e) {
         String msg;
-        // MethodArgumentNotValidException 的完整类路径
-        String methodNotValidClassPath = "org.springframework.web.bind.MethodArgumentNotValidException";
 
         // 判断是否为方法参数验证异常
-        if (methodNotValidClassPath.equals(e.getClass()
-                                            .getName())) {
-            // 获取所有字段错误
-            List<FieldError> fieldErrors = ((MethodArgumentNotValidException) e).getFieldErrors();
-            StringBuilder msgBuilder = new StringBuilder();
-            // 构建错误信息，拼接所有字段错误
-            for (FieldError fieldError : fieldErrors) {
-                msgBuilder.append(fieldError.getField())
-                          .append(": ")
-                          .append(fieldError.getDefaultMessage())
-                          .append("; ");
+        switch (e.getClass()
+                 .getName()) {
+            case "org.springframework.web.bind.MethodArgumentNotValidException" -> {
+                // 获取所有字段错误
+                List<FieldError> fieldErrors = ((MethodArgumentNotValidException) e).getFieldErrors();
+                StringBuilder msgBuilder = new StringBuilder();
+                // 构建错误信息，拼接所有字段错误
+                for (FieldError fieldError : fieldErrors) {
+                    msgBuilder.append(fieldError.getField())
+                              .append(": ")
+                              .append(fieldError.getDefaultMessage())
+                              .append("; ");
+                }
+                msg = msgBuilder.toString();
             }
-            msg = msgBuilder.toString();
-        } else {
-            // 对于 VerifyException，直接使用异常消息
-            msg = e.getMessage();
+            case "com.wolfhouse.springboot3initial.common.util.verify.impl.VerifyException" -> {
+                // 对于 VerifyException，直接使用异常消息
+                msg = e.getMessage();
+            }
+            case "org.springframework.web.multipart.support.MissingServletRequestPartException" -> {
+                msg = HttpCode.PARAM_ERROR.message + ((MissingServletRequestPartException) e).getRequestPartName();
+            }
+            default -> msg = e.getMessage();
+
         }
         log.error("字段校验异常: {}", msg, e);
         return HttpResult.failedWithStatus(HttpStatus.BAD_REQUEST.value(),
