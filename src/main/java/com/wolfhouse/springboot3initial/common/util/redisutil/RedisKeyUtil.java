@@ -53,7 +53,7 @@ public class RedisKeyUtil {
      * 如果该键已存在，则不进行任何操作。
      * 生成的键值是基于前缀、次级前缀和提供的名称，通过分隔符拼接而成的。
      * <p>
-     * 注意，该方法线程不安全。若多个线程使用单例工具类，则应换用 {@link #registerKeyWithPrefix(String, String, String)}
+     * 注意，该方法线程不安全。若多个线程使用单例工具类，则应换用 {@link #registerKeyWithSecPrefix(String, String, String...)}
      *
      * @param key  要注册的键，不允许为 null。
      * @param name 键所对应的名称，可以为 null。如果为 null，仅使用前缀和次级前缀生成键值。
@@ -78,16 +78,36 @@ public class RedisKeyUtil {
      * @param secondaryPrefix 可选的次级前缀。如果为 null，仅使用主要前缀与名称生成键值。
      * @return 返回当前的 RedisKeyUtil 实例，以支持链式调用。
      */
-    public RedisKeyUtil registerKeyWithPrefix(String key, String name, String... secondaryPrefix) {
+    public RedisKeyUtil registerKeyWithSecPrefix(String key, String name, String... secondaryPrefix) {
         String combinedSecPrefix = Arrays.stream(secondaryPrefix)
                                          .filter(s -> s != null && !s.isBlank())
                                          .collect(Collectors.joining(separator));
-        
+
         keyMap.computeIfAbsent(key, k -> Stream.of(prefix, combinedSecPrefix, name)
                                                .filter(s -> s != null && !s.isBlank())
                                                .collect(Collectors.joining(separator)));
         return this;
     }
+
+    /**
+     * 使用指定的完整前缀，向内部键值映射中注册指定的键及其对应的名称。
+     * 如果该键已存在，则不进行任何操作。
+     * 生成的键值是基于提供的完整前缀和名称，通过分隔符拼接而成的。
+     * <p>
+     * 若工具实例在多个线程中使用，则应使用该方法以确保不会因并发问题而有意外的次级前缀
+     *
+     * @param key    要注册的键，不允许为 null。
+     * @param name   键所对应的名称，可以为 null。如果为 null，仅使用主要前缀与次级前缀生成键值。
+     * @param prefix 指定的完整前缀。
+     * @return 返回当前的 RedisKeyUtil 实例，以支持链式调用。
+     */
+    public RedisKeyUtil registerKeyWithPrefix(String key, String name, String prefix) {
+        keyMap.computeIfAbsent(key, k -> Stream.of(prefix, name)
+                                               .filter(s -> s != null && !s.isBlank())
+                                               .collect(Collectors.joining(separator)));
+        return this;
+    }
+
 
     public RedisKeyUtil registerKey(String key) {
         return registerKey(key, null);
