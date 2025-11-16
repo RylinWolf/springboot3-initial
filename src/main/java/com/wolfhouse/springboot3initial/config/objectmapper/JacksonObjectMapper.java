@@ -73,9 +73,9 @@ public class JacksonObjectMapper extends ObjectMapper {
         module.addSerializer(LocalDate.class, new LocalDateSerializer(date));
         module.addSerializer(LocalTime.class, new LocalTimeSerializer(time));
 
-        module.addDeserializer(LocalDateTime.class, LocalDateTimeDeserializer.INSTANCE);
-        module.addDeserializer(LocalDate.class, LocalDateDeserializer.INSTANCE);
-        module.addDeserializer(LocalTime.class, LocalTimeDeserializer.INSTANCE);
+        module.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(datetime));
+        module.addDeserializer(LocalDate.class, new LocalDateDeserializer(date));
+        module.addDeserializer(LocalTime.class, new LocalTimeDeserializer(time));
 
         this.registerModule(module);
 
