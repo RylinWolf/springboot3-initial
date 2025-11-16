@@ -7,6 +7,8 @@ import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
+import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
+import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,6 +36,7 @@ import java.util.List;
 public class LoginStoreFilter extends OncePerRequestFilter {
     private final UserAdminAuthMediator mediator;
     private final JacksonObjectMapper objectMapper;
+    private final ServiceRedisUtil redisUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -73,7 +77,13 @@ public class LoginStoreFilter extends OncePerRequestFilter {
         long time = session.getLastAccessedTime();
         LocalDateTime lastAccessedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(time),
                                                                      ZoneId.systemDefault());
-        mediator.updateAccessedTime(lastAccessedDateTime);
+        //  使用 Redis 缓存最后登录时间
+        redisUtil.setValueExpire(UserRedisConstant.LAST_LOGIN_WITH_FORMAT,
+                                 lastAccessedDateTime,
+                                 Duration.ofMinutes(15),
+                                 loginUser.getId()
+                                          .toString());
+
         filterChain.doFilter(request, response);
     }
 }
