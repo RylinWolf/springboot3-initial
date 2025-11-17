@@ -16,4 +16,6 @@ public class UserRedisConstant {
     @RedisKey(asName = true, name = "%s")
     public static final String USER_AVATAR = "userAvatar";
 
+    public static final String USER_VO_WITH_FORMAT = "user_%s";
+
 }
