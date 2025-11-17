@@ -4,6 +4,7 @@ import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
+import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
@@ -17,21 +18,7 @@ import java.util.Map;
  * @author Rylin Wolf
  */
 public interface UserAdminAuthMediator {
-    /**
-     * 检查具有指定ID的用户认证是否存在。
-     *
-     * @param id 用户认证的唯一标识符
-     * @return 如果用户认证存在，返回true；否则返回false
-     */
-    Boolean isUserExist(Long id);
-
-    /**
-     * 检查具有指定电子邮件的用户是否存在。
-     *
-     * @param email 用户的电子邮件地址
-     * @return 如果拥有该电子邮件地址的用户存在，返回true；否则返回false
-     */
-    Boolean isUserEmailExist(String email);
+    // region 注册中介者
 
     /**
      * 注册用户服务组件到中介者。
@@ -53,6 +40,50 @@ public interface UserAdminAuthMediator {
      * @param adminService 管理员服务组件实例
      */
     void registerAdminService(AdminService adminService);
+
+    // endregion
+
+    // region 获取服务
+
+    /**
+     * 获取用户服务组件实例。
+     *
+     * @return {@link UserService} 用户服务组件实例
+     */
+    UserService getUserService();
+
+    /**
+     * 获取验证服务组件实例。
+     *
+     * @return {@link AuthenticationService} 验证服务组件实例
+     */
+    AuthenticationService getAuthService();
+
+    /**
+     * 获取管理服务组件实例。
+     *
+     * @return {@link AdminService} 管理服务组件实例
+     */
+    AdminService getAdminService();
+
+    // endregion
+
+    /**
+     * 检查具有指定ID的用户认证是否存在。
+     *
+     * @param id 用户认证的唯一标识符
+     * @return 如果用户认证存在，返回true；否则返回false
+     */
+    Boolean isUserExist(Long id);
+
+    /**
+     * 检查具有指定电子邮件的用户是否存在。
+     *
+     * @param email 用户的电子邮件地址
+     * @return 如果拥有该电子邮件地址的用户存在，返回true；否则返回false
+     */
+    Boolean isUserEmailExist(String email);
+
 
     /**
      * 检查具有指定ID的用户是否是管理员。
@@ -117,4 +148,13 @@ public interface UserAdminAuthMediator {
      * @return 更新条数
      */
     Long updateAccessedTime(Map<Long, LocalDateTime> lastLogins);
+
+    /**
+     * 根据用户唯一标识符获取用户的详细信息。
+     *
+     * @param id 要查询的用户 ID
+     * @return {@link UserVo} 表示用户详细信息的对象，包括用户ID、用户名、账号、头像、性别、生日、
+     * 个性标签、手机、邮箱、最后登录时间和注册时间
+     */
+    UserVo getVoById(Long id);
 }

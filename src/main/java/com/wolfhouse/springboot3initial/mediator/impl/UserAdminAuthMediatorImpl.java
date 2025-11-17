@@ -10,6 +10,7 @@ import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
+import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
@@ -159,6 +160,11 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
         return userService.updateAccessedTime(lastLogins);
     }
 
+    @Override
+    public UserVo getVoById(Long id) {
+        return userService.getVoById(id);
+    }
+
     // region 注册服务
 
     /**
@@ -189,6 +195,25 @@ public class UserAdminAuthMediatorImpl implements UserAdminAuthMediator {
     @Override
     public void registerAdminService(AdminService adminService) {
         this.adminService = adminService;
+    }
+
+    // endregion
+
+    // region 获取服务
+
+    @Override
+    public AdminService getAdminService() {
+        return this.adminService;
+    }
+
+    @Override
+    public UserService getUserService() {
+        return this.userService;
+    }
+
+    @Override
+    public AuthenticationService getAuthService() {
+        return this.authService;
     }
 
     // endregion
