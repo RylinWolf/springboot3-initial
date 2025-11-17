@@ -6,6 +6,8 @@ import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
 import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +31,12 @@ public class UserAdminAuthTask {
 
     private final ServiceRedisUtil redisUtil;
     private final UserAdminAuthMediator mediator;
-    private final JacksonObjectMapper objectMapper;
+    private JacksonObjectMapper objectMapper;
+
+    @Autowired
+    public void setObjectMapper(@Qualifier("redisObjectMapper") JacksonObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Scheduled(cron = "0 30 3 */2 * *")
     public void lastLoginRedisToDb() {

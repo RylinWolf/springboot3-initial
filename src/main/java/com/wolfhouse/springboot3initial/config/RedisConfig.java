@@ -23,7 +23,8 @@ public class RedisConfig {
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory,
-                                                       @Qualifier("objectMapper") JacksonObjectMapper objectMapper) {
+                                                       @Qualifier("redisObjectMapper")
+                                                       JacksonObjectMapper objectMapper) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory);
 

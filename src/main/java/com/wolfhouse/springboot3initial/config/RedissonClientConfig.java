@@ -30,7 +30,7 @@ public class RedissonClientConfig {
     private ObjectMapper jacksonObjectMapper;
 
     @Autowired
-    public void setJacksonObjectMapper(@Qualifier("objectMapper") ObjectMapper jacksonObjectMapper) {
+    public void setJacksonObjectMapper(@Qualifier("redisObjectMapper") ObjectMapper jacksonObjectMapper) {
         this.jacksonObjectMapper = jacksonObjectMapper;
     }
 

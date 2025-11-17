@@ -1,6 +1,9 @@
 package com.wolfhouse.springboot3initial.config.objectmapper;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import lombok.RequiredArgsConstructor;
 import org.openapitools.jackson.nullable.JsonNullableModule;
 import org.springframework.context.annotation.Bean;
@@ -28,8 +31,18 @@ public class ObjectMapperConfig {
     @Bean
     public JacksonObjectMapper jsonNullableMapper() {
         JacksonObjectMapper om = defaultMapper(dateFormatConfig);
-//        om.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        //        om.setSerializationInclusion(JsonInclude.Include.NON_NULL)
         om.registerModule(new JsonNullableModule());
+        return om;
+    }
+
+    @Bean
+    public JacksonObjectMapper redisObjectMapper() {
+        JacksonObjectMapper om = defaultMapper(dateFormatConfig);
+        // 配置指定保存类型信息，解决 Redis LinkedHashMap 的问题
+        om.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
+                                 ObjectMapper.DefaultTyping.NON_FINAL,
+                                 JsonTypeInfo.As.PROPERTY);
         return om;
     }
 
