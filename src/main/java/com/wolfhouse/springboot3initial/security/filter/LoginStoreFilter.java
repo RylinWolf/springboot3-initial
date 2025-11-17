@@ -54,7 +54,7 @@ public class LoginStoreFilter extends OncePerRequestFilter {
             return;
         }
         // session 若超过单次登录最长允许时间，则直接过期
-        long sessionDuration = session.getLastAccessedTime() - session.getCreationTime();
+        long sessionDuration = (session.getLastAccessedTime() - session.getCreationTime()) / 1000;
         if (properties.maxLoginTtl() <= sessionDuration) {
             session.setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
             filterChain.doFilter(request, response);
