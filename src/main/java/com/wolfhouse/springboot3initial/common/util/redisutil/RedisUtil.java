@@ -111,11 +111,6 @@ public class RedisUtil {
     public Boolean deleteValue(@NonNull String key) {
         return this.redisTemplate.delete(key);
     }
-
-    public Boolean isKeyExist(@NonNull String key) {
-        return this.redisTemplate.hasKey(key);
-    }
-
     // endregion
 
     // region 内置方法

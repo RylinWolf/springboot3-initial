@@ -63,19 +63,7 @@ public class ServiceRedisUtil extends RedisUtil {
                           .formatted(formats);
         return super.hasKey(key);
     }
-
-    @Override
-    public Boolean isKeyExist(@NonNull String key) {
-        key = redisKeyUtil.getKey(key);
-        return super.isKeyExist(key);
-    }
-
-    public Boolean isKeyExist(@NonNull String key, Object... formats) {
-        key = redisKeyUtil.getKey(key)
-                          .formatted(formats);
-        return super.isKeyExist(key);
-    }
-
+    
     @Override
     public Boolean deleteValue(@NonNull String key) {
         key = redisKeyUtil.getKey(key);
