@@ -1,7 +1,6 @@
 package com.wolfhouse.springboot3initial.mvc.service.user.impl;
 
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.aliyun.oss.model.CannedAccessControlList;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryChain;
@@ -380,7 +379,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public String uploadAvatar(MultipartFile file) throws ImgValidException {
+    public void uploadAvatar(MultipartFile file) throws ImgValidException {
         // 0. 校验登录信息
         UserLocalDto user = getLoginOrThrow();
         // 1. 校验文件
@@ -401,7 +400,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 3. 上传文件
         try (var ins = file.getInputStream()) {
             // TODO Redis 获取已上传图片路径，判断是否有已经上传但没有使用的头像指纹，有则删除
-
             // 3.1 压缩图片大小
             // 构建压缩器
             ImgCompressor compressor = ImgCompressor.of(ins);
@@ -440,14 +438,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
 
-        // 4. 保存指纹与地址映射
-        // 拼接上传路径：桶名称.域名 + 目录前缀 + 文件名
-        String fingerprint = DigestUtil.md5Hex(filepath);
-        // 指纹 15 分钟有效
-        // 使用自定义 Redis 工具优化
-        redisUtil.setValueExpire(UserRedisConstant.USER_AVATAR, filepath, Duration.ofMinutes(15), fingerprint);
-        // 5. 返回指纹
-        return fingerprint;
+        // 4. 保存用户 ID  与地址映射
+        // 头像缓存保留 15 分钟
+        redisUtil.setValueExpire(UserRedisConstant.USER_AVATAR, filepath, Duration.ofMinutes(15), user.getId());
     }
 
     // endregion

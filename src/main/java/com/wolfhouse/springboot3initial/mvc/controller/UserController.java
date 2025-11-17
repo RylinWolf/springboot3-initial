@@ -131,13 +131,12 @@ public class UserController {
     @PostMapping("/avatar")
     @Operation(summary = "上传头像")
     public ResponseEntity<? extends HttpResult<?>> uploadAvatar(@RequestParam("avatar") MultipartFile avatar) {
-        String fingerprint;
         try {
-            fingerprint = userService.uploadAvatar(avatar);
+            userService.uploadAvatar(avatar);
         } catch (ImgValidException e) {
             return HttpResult.failedWithStatus(HttpCode.PARAM_ERROR, e.getMessage());
         }
-        return HttpResult.ok(fingerprint);
+        return HttpResult.ok(null);
     }
 
     @PutMapping("/pwd")
