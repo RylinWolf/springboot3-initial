@@ -51,6 +51,18 @@ custom:
       avatar-bucket-name: ${oss.aliyun.avatar-bucket-name}
       custom-endpoint: ${oss.aliyun.custom-endpoint:}
 
+  # Redis 配置
+  redis:
+    # 键前缀
+    key-prefix: ${custom.redis.key-prefix:'service'}
+    # 键分隔符
+    separator: ${custom.redis.separator:':'}
+    # 登录信息过期时间(分钟)，两次登录间隔超出该时间，将需要重新登录。默认 3 天
+    login-expire: ${custom.redis.login-expire:259200}
+    # 单次登录信息最长存活时间(分钟)，超过该时间后将无法续期 session
+    max-login-ttl: ${custom.redis.max-login-ttl:259200}
+
+
 
 # knife4j 文档配置
 # springdoc-openapi项目配置
