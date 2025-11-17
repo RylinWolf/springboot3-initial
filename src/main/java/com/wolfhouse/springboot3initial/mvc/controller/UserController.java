@@ -5,6 +5,7 @@ import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.result.HttpResult;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.imageutil.ImgValidException;
+import com.wolfhouse.springboot3initial.mvc.application.UserApplication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
@@ -35,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final UserApplication userApplication;
 
     @PostMapping("/login")
     @Operation(summary = "登录")
@@ -58,7 +60,7 @@ public class UserController {
         request.getSession()
                .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY,
                              localDto);
-        return HttpResult.success(userService.getVoById(localDto.getId()));
+        return HttpResult.success(userApplication.getVoById(localDto.getId()));
     }
 
     @DeleteMapping("/logout")
@@ -81,11 +83,7 @@ public class UserController {
     @GetMapping
     @Operation(summary = "获取当前登录用户")
     public HttpResult<UserVo> getLogin() {
-        UserLocalDto login = userService.getLogin();
-        if (login == null) {
-            return HttpResult.failed(HttpCode.UN_AUTHORIZED, null);
-        }
-        return HttpResult.success(userService.getVoById(login.getId()));
+        return HttpResult.failedIfBlank(userApplication.getLoginVo());
     }
 
     /**
