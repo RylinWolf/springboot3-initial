@@ -7,6 +7,7 @@ import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
+import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisProperties;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
 import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
 import jakarta.servlet.FilterChain;
@@ -37,6 +38,7 @@ public class LoginStoreFilter extends OncePerRequestFilter {
     private final UserAdminAuthMediator mediator;
     private final JacksonObjectMapper objectMapper;
     private final ServiceRedisUtil redisUtil;
+    private final ServiceRedisProperties properties;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -51,11 +53,18 @@ public class LoginStoreFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        // session 若超过单次登录最长允许时间，则直接过期
+        long sessionDuration = session.getLastAccessedTime() - session.getCreationTime();
+        if (properties.maxLoginTtl() <= sessionDuration) {
+            session.setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 2. 获取登录用户权限，保存至安全上下文
         if (!mediator.isUserExist(loginUser.getId())) {
             // 用户不存在，清除 session
-            request.getSession()
-                   .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
+            session.setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
             throw new ServiceException(HttpCode.UN_AUTHORIZED);
         }
         // 初始化权限列表
