@@ -3,7 +3,7 @@ package com.wolfhouse.springboot3initial.util.verifynode.user;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.EmailVerifyNode;
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.util.verifynode.ServiceVerifyConstant;
 
 /**

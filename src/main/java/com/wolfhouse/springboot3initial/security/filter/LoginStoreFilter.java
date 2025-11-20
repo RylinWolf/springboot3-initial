@@ -4,12 +4,12 @@ import com.wolfhouse.springboot3initial.common.constant.UserConstant;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.config.objectmapper.JacksonObjectMapper;
 import com.wolfhouse.springboot3initial.exception.ServiceException;
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisProperties;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
-import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
+import com.wolfhouse.springboot3initial.util.redisutil.service.RedisUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -38,6 +37,7 @@ public class LoginStoreFilter extends OncePerRequestFilter {
     private final UserAdminAuthMediator mediator;
     private final JacksonObjectMapper objectMapper;
     private final ServiceRedisUtil redisUtil;
+    private final RedisUserService redisUserService;
     private final ServiceRedisProperties properties;
 
     @Override
@@ -64,35 +64,28 @@ public class LoginStoreFilter extends OncePerRequestFilter {
         Long loginId = loginUser.getId();
 
         // 2. 获取登录用户权限，保存至安全上下文
-        if (!redisUtil.hasKey(UserRedisConstant.USER_EXIST, loginId)) {
+        if (!redisUserService.userExist(loginId)) {
             if (!mediator.isUserExist(loginId)) {
                 // 用户不存在，清除 session
                 session.setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
                 throw new ServiceException(HttpCode.UN_AUTHORIZED);
             }
             // 缓存用户存在
-            redisUtil.setValueExpire(UserRedisConstant.USER_EXIST, null, UserRedisConstant.EXIST_DURATION, loginId);
+            redisUserService.setExist(loginId);
         }
-        
+
         // 初始化权限列表
         List<Authentication> authList = null;
         // 注入权限
         if (Boolean.TRUE.equals(loginUser.getIsAdmin())) {
             // 从缓存中获取
-            if (redisUtil.hasKey(UserRedisConstant.USER_AUTH, loginId)) {
-                try {
-                    authList = (List<Authentication>) redisUtil.getValueAndExpire(UserRedisConstant.USER_AUTH,
-                                                                                  UserRedisConstant.USER_AUTH_DURATION,
-                                                                                  loginId);
-                } catch (Exception ignored) {}
+            if (redisUserService.authExist(loginId)) {
+                authList = redisUserService.getAuth(loginId);
             }
             if (authList == null) {
                 // 注入缓存
                 authList = mediator.getAuthByAdminId(loginId);
-                redisUtil.setValueExpire(UserRedisConstant.USER_AUTH,
-                                         authList,
-                                         UserRedisConstant.USER_AUTH_DURATION,
-                                         loginId);
+                redisUserService.setAuth(loginId, authList);
             }
         }
         // 2. 保存用户名密码认证类实例至安全上下文
@@ -108,10 +101,7 @@ public class LoginStoreFilter extends OncePerRequestFilter {
         LocalDateTime lastAccessedDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(time),
                                                                      ZoneId.systemDefault());
         //  使用 Redis 缓存最后登录时间
-        redisUtil.setValueExpire(UserRedisConstant.LAST_LOGIN_WITH_FORMAT,
-                                 lastAccessedDateTime,
-                                 Duration.ofMinutes(15),
-                                 loginId.toString());
+        redisUserService.setLastLogin(loginId, lastAccessedDateTime);
 
         filterChain.doFilter(request, response);
     }

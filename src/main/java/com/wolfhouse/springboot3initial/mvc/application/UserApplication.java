@@ -1,19 +1,18 @@
 package com.wolfhouse.springboot3initial.mvc.application;
 
 import com.wolfhouse.springboot3initial.config.objectmapper.JacksonObjectMapper;
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisProperties;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
-import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
+import com.wolfhouse.springboot3initial.util.redisutil.service.RedisUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
@@ -25,6 +24,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class UserApplication {
     private final ServiceRedisUtil redisUtil;
+    private final RedisUserService redisUserService;
     private final UserAdminAuthMediator mediator;
     private final ServiceRedisProperties properties;
     private JacksonObjectMapper redisObjectMapper;
@@ -44,29 +44,22 @@ public class UserApplication {
     }
 
     public UserVo getVoById(Long id) {
-        // 构建 Redis 键
-        String key = UserRedisConstant.USER_VO;
-
-        UserVo vo;
-        if (redisUtil.hasKey(key, id)) {
-            // 从缓存获得
-            vo = (UserVo) redisUtil.getValue(key, id);
-        } else {
+        // 1. 获得 Vo
+        // 从缓存获取
+        UserVo vo = redisUserService.getVo(id);
+        if (vo == null) {
             // 从数据库获得
             vo = mediator.getVoById(id);
         }
         // 2. 数据聚合
-        LocalDateTime loginTime =
-            redisObjectMapper.convertValue(
-                redisUtil.getValue(UserRedisConstant.LAST_LOGIN_WITH_FORMAT, id),
-                LocalDateTime.class);
+        LocalDateTime loginTime = redisUserService.lastLogin(id);
 
         if (loginTime == null) {
             loginTime = LocalDateTime.now();
         }
         vo.setLoginDate(loginTime);
         // 3. 缓存
-        redisUtil.setValueExpire(key, vo, Duration.ofMinutes(properties.loginExpire()), id);
+        redisUserService.setVo(vo);
 
         // 4. 返回
         return vo;

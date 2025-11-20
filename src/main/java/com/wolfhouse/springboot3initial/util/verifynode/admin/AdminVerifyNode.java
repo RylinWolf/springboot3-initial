@@ -1,6 +1,6 @@
 package com.wolfhouse.springboot3initial.util.verifynode.admin;
 
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 
 /**
  * @author Rylin Wolf

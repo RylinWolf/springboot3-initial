@@ -1,12 +1,13 @@
 package com.wolfhouse.springboot3initial.common.util.redisutil;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
@@ -26,10 +27,15 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class RedisKeyAnnotationProcessor implements BeanPostProcessor {
 
     private final RedisKeyUtil redisKeyUtil;
+
+    @Lazy
+    @Autowired
+    public RedisKeyAnnotationProcessor(RedisKeyUtil redisKeyUtil) {
+        this.redisKeyUtil = redisKeyUtil;
+    }
 
     @Override
     public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {

@@ -85,10 +85,7 @@ public class RedisUtil {
     public void setValueExpire(@NonNull String key, Object value, Duration duration) {
         this.opsForValue.set(key, value, duration);
     }
-
-    public void setExpire(@NonNull String key, Duration duration) {
-        this.redisTemplate.expire(key, duration);
-    }
+    
 
     public Boolean setValueIfAbsent(@NonNull String key, Object value) {
         return this.opsForValue.setIfAbsent(key, value);
@@ -108,9 +105,6 @@ public class RedisUtil {
         return opsForValue.getAndDelete(key);
     }
 
-    public Boolean deleteValue(@NonNull String key) {
-        return this.redisTemplate.delete(key);
-    }
     // endregion
 
     // region 内置方法

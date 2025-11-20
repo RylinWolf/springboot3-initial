@@ -1,6 +1,6 @@
 package com.wolfhouse.springboot3initial.security.config;
 
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLocalDto;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;

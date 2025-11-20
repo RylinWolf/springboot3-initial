@@ -1,4 +1,4 @@
-package com.wolfhouse.springboot3initial.mediator;
+package com.wolfhouse.springboot3initial.mvc.mediator;
 
 import com.wolfhouse.springboot3initial.exception.ServiceException;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;

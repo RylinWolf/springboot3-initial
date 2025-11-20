@@ -4,7 +4,7 @@ import com.wolfhouse.springboot3initial.common.constant.AuthenticationConstant;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.BaseVerifyNode;
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 
 import java.util.Collection;
 

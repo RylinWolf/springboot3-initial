@@ -1,7 +1,7 @@
 package com.wolfhouse.springboot3initial.task;
 
 import com.wolfhouse.springboot3initial.config.objectmapper.JacksonObjectMapper;
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
 import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
 import lombok.RequiredArgsConstructor;

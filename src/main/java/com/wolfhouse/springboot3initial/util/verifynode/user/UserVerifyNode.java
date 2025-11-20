@@ -5,7 +5,7 @@ import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyException;
 import com.wolfhouse.springboot3initial.common.util.verify.VerifyStrategy;
 import com.wolfhouse.springboot3initial.common.util.verify.impl.StrLenVerifyNode;
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 
 import java.time.LocalDate;
 

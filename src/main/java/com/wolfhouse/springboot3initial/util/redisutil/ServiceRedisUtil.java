@@ -65,18 +65,6 @@ public class ServiceRedisUtil extends RedisUtil {
     }
     
     @Override
-    public Boolean deleteValue(@NonNull String key) {
-        key = redisKeyUtil.getKey(key);
-        return super.deleteValue(key);
-    }
-
-    public Boolean deleteValue(@NonNull String key, Object... formats) {
-        key = redisKeyUtil.getKey(key)
-                          .formatted(formats);
-        return super.deleteValue(key);
-    }
-
-    @Override
     public Object getValueAndDelete(@NonNull String key) {
         key = redisKeyUtil.getKey(key);
         return super.getValueAndDelete(key);
@@ -122,18 +110,6 @@ public class ServiceRedisUtil extends RedisUtil {
         key = redisKeyUtil.getKey(key)
                           .formatted(formats);
         return super.setValueIfAbsent(key, value);
-    }
-
-    @Override
-    public void setExpire(@NonNull String key, Duration duration) {
-        key = redisKeyUtil.getKey(key);
-        super.setExpire(key, duration);
-    }
-
-    public void setExpire(@NonNull String key, Duration duration, Object... formats) {
-        key = redisKeyUtil.getKey(key)
-                          .formatted(formats);
-        super.setExpire(key, duration);
     }
 
     @Override

@@ -1,10 +1,10 @@
-package com.wolfhouse.springboot3initial.mediator.impl;
+package com.wolfhouse.springboot3initial.mvc.mediator.impl;
 
 import cn.hutool.json.JSONUtil;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
 import com.wolfhouse.springboot3initial.common.util.beanutil.ThrowUtil;
-import com.wolfhouse.springboot3initial.mediator.UserAdminAuthMediator;
+import com.wolfhouse.springboot3initial.mvc.mediator.UserAdminAuthMediator;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Admin;
 import com.wolfhouse.springboot3initial.mvc.model.domain.auth.Authentication;
 import com.wolfhouse.springboot3initial.mvc.model.domain.user.User;
