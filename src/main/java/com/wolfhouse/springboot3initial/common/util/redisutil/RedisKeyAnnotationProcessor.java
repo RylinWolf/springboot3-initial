@@ -64,6 +64,11 @@ public class RedisKeyAnnotationProcessor implements BeanPostProcessor {
                         continue;
                     }
 
+                    // 如果字段标明非 RedisKey，跳过
+                    if (field.getAnnotation(Except.class) != null) {
+                        continue;
+                    }
+
                     field.setAccessible(true);
                     // 常量值 为 键
                     String key = (String) field.get(null);
