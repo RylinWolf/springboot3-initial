@@ -41,6 +41,7 @@ public class LoginStoreFilter extends OncePerRequestFilter {
     private final ServiceRedisProperties properties;
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void doFilterInternal(HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -60,23 +61,43 @@ public class LoginStoreFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        Long loginId = loginUser.getId();
 
         // 2. 获取登录用户权限，保存至安全上下文
-        if (!mediator.isUserExist(loginUser.getId())) {
-            // 用户不存在，清除 session
-            session.setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
-            throw new ServiceException(HttpCode.UN_AUTHORIZED);
+        if (!redisUtil.hasKey(UserRedisConstant.USER_EXIST, loginId)) {
+            if (!mediator.isUserExist(loginId)) {
+                // 用户不存在，清除 session
+                session.setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, null);
+                throw new ServiceException(HttpCode.UN_AUTHORIZED);
+            }
+            // 缓存用户存在
+            redisUtil.setValueExpire(UserRedisConstant.USER_EXIST, null, UserRedisConstant.EXIST_DURATION, loginId);
         }
+        
         // 初始化权限列表
-        List<Authentication> authList = List.of();
+        List<Authentication> authList = null;
         // 注入权限
-        if (mediator.isAdmin(loginUser.getId())) {
-            loginUser.setIsAdmin(true);
-            authList = mediator.getAuthByAdminId(loginUser.getId());
+        if (Boolean.TRUE.equals(loginUser.getIsAdmin())) {
+            // 从缓存中获取
+            if (redisUtil.hasKey(UserRedisConstant.USER_AUTH, loginId)) {
+                try {
+                    authList = (List<Authentication>) redisUtil.getValueAndExpire(UserRedisConstant.USER_AUTH,
+                                                                                  UserRedisConstant.USER_AUTH_DURATION,
+                                                                                  loginId);
+                } catch (Exception ignored) {}
+            }
+            if (authList == null) {
+                // 注入缓存
+                authList = mediator.getAuthByAdminId(loginId);
+                redisUtil.setValueExpire(UserRedisConstant.USER_AUTH,
+                                         authList,
+                                         UserRedisConstant.USER_AUTH_DURATION,
+                                         loginId);
+            }
         }
         // 2. 保存用户名密码认证类实例至安全上下文
         UsernamePasswordAuthenticationToken token =
-            new UsernamePasswordAuthenticationToken(loginUser.getId(),
+            new UsernamePasswordAuthenticationToken(loginId,
                                                     null,
                                                     authList);
         token.setDetails(loginUser);
@@ -90,8 +111,7 @@ public class LoginStoreFilter extends OncePerRequestFilter {
         redisUtil.setValueExpire(UserRedisConstant.LAST_LOGIN_WITH_FORMAT,
                                  lastAccessedDateTime,
                                  Duration.ofMinutes(15),
-                                 loginUser.getId()
-                                          .toString());
+                                 loginId.toString());
 
         filterChain.doFilter(request, response);
     }

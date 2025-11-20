@@ -27,7 +27,7 @@ public @interface RedisKey {
     /** 分隔符 */
     String separator() default RedisKeyUtil.DEFAULT_KEY_SEPARATOR;
 
-    /** 自定义名称，asName 为 true 时该属性不生效 */
+    /** 自定义名称，asName 为 true 时，跟在字段名之后 */
     String name() default "";
 
     /**
@@ -35,7 +35,7 @@ public @interface RedisKey {
      * <p>
      * 对类使用时，该属性不生效
      */
-    boolean asName() default false;
+    boolean asName() default true;
 
     /**
      * 注解的类是否为键常量类，若是，则提取所有常量，遵从以下规范：

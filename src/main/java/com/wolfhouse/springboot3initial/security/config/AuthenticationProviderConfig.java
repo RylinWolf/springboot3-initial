@@ -6,6 +6,8 @@ import com.wolfhouse.springboot3initial.mvc.model.dto.user.UserLoginDto;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AdminService;
 import com.wolfhouse.springboot3initial.mvc.service.auth.AuthenticationService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
+import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
+import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +28,7 @@ public class AuthenticationProviderConfig implements AuthenticationProvider {
     private final AdminService adminService;
     private final AuthenticationService authenticationService;
     private final UserAdminAuthMediator mediator;
+    private final ServiceRedisUtil redisUtil;
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -46,6 +49,11 @@ public class AuthenticationProviderConfig implements AuthenticationProvider {
         if (Optional.ofNullable(localDto.getIsAdmin())
                     .orElse(false)) {
             authList = mediator.getAuthByAdminId(localDto.getId());
+            // 缓存权限
+            redisUtil.setValueExpire(UserRedisConstant.USER_AUTH,
+                                     authList,
+                                     UserRedisConstant.USER_AUTH_DURATION,
+                                     localDto.getId());
         }
         // 2. 登录成功返回用户名密码认证类实例
         UsernamePasswordAuthenticationToken token =
