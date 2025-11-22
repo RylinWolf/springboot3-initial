@@ -55,6 +55,13 @@ public class OssUploadLog {
     private String filePath;
 
     /**
+     * 文件在 OSS 中存储的路径
+     */
+    @Schema(description = "文件 OSS 存储路径")
+    @Column(value = "file_oss_path")
+    private String fileOssPath;
+    
+    /**
      * 上传用户
      */
     @Schema(description = "上传用户")
@@ -68,5 +75,11 @@ public class OssUploadLog {
     @Column(value = "upload_time")
     private Date uploadTime;
 
+    /**
+     * 文件删除
+     */
+    @Schema(description = "文件是否已删除")
+    @Column(value = "file_deleted", isLogicDelete = true)
+    private Integer fileDeleted;
 
 }
