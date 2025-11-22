@@ -35,12 +35,8 @@ public class RedisUtil {
 
     // region set 方法
 
-    public void addSetValue(@NonNull String key, Object value) {
-        opsForSet.add(key, value);
-    }
-
-    public void addSetValueExpire(@NonNull String key, Object value, Duration duration) {
-        opsForSet.add(key, value, duration);
+    public Long addSetValue(@NonNull String key, Object... value) {
+        return opsForSet.add(key, value);
     }
 
     public void removeSetValue(@NonNull String key, Object value) {
@@ -49,6 +45,10 @@ public class RedisUtil {
 
     public Object popSetValue(@NonNull String key, Object value) {
         return opsForSet.pop(key);
+    }
+
+    public Set<Object> getSetMembers(@NonNull String key) {
+        return opsForSet.members(key);
     }
 
     public Long sizeOfSetValue(@NonNull String key) {
@@ -85,7 +85,7 @@ public class RedisUtil {
     public void setValueExpire(@NonNull String key, Object value, Duration duration) {
         this.opsForValue.set(key, value, duration);
     }
-    
+
 
     public Boolean setValueIfAbsent(@NonNull String key, Object value) {
         return this.opsForValue.setIfAbsent(key, value);
@@ -120,7 +120,8 @@ public class RedisUtil {
     public Boolean expire(@NonNull String key, Duration duration) {
         return redisTemplate.expire(key, duration);
     }
-    // endregion'
+
+    // endregion
 
     // region 键匹配
 
@@ -133,10 +134,11 @@ public class RedisUtil {
      */
     public Set<String> keysMatch(@NonNull String pattern, int count) {
         HashSet<String> keys = new HashSet<>();
-        try (Cursor<String> cursor = redisTemplate.scan(ScanOptions.scanOptions()
-                                                                   .match(pattern)
-                                                                   .count(count)
-                                                                   .build())) {
+        try (Cursor<String> cursor = redisTemplate.scan(
+            ScanOptions.scanOptions()
+                       .match(pattern)
+                       .count(count)
+                       .build())) {
             while (cursor.hasNext()) {
                 keys.add(cursor.next());
             }

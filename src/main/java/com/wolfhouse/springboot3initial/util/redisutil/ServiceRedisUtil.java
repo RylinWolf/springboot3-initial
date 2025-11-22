@@ -63,7 +63,7 @@ public class ServiceRedisUtil extends RedisUtil {
                           .formatted(formats);
         return super.hasKey(key);
     }
-    
+
     @Override
     public Object getValueAndDelete(@NonNull String key) {
         key = redisKeyUtil.getKey(key);
@@ -137,6 +137,32 @@ public class ServiceRedisUtil extends RedisUtil {
     }
 
     @Override
+    public Long getAndDecrease(@NonNull String key, int value) {
+        key = redisKeyUtil.getKey(key);
+        return super.getAndDecrease(key, value);
+    }
+
+    public Long getAndDecrease(@NonNull String key, int value, Object... formats) {
+        key = redisKeyUtil.getKey(key)
+                          .formatted(formats);
+        return super.getAndDecrease(key, value);
+    }
+
+    @Override
+    public Long getAndIncrease(@NonNull String key, int value) {
+        key = redisKeyUtil.getKey(key);
+        return super.getAndIncrease(key, value);
+    }
+
+    public Long getAndIncrease(@NonNull String key, int value, Object... formats) {
+        key = redisKeyUtil.getKey(key)
+                          .formatted(formats);
+        return super.getAndIncrease(key, value);
+    }
+
+    // region ZSet
+
+    @Override
     public Double incrementZSetValue(@NonNull String key, Object value, double score) {
         key = redisKeyUtil.getKey(key);
         return super.incrementZSetValue(key, value, score);
@@ -172,6 +198,10 @@ public class ServiceRedisUtil extends RedisUtil {
                           .formatted(formats);
         return super.addZSetValue(key, value, score);
     }
+
+    // endregion
+
+    // region set
 
     @Override
     public Boolean isSetValueMember(@NonNull String key, Object value) {
@@ -221,22 +251,11 @@ public class ServiceRedisUtil extends RedisUtil {
         super.removeSetValue(key, value);
     }
 
-    @Override
-    public void addSetValueExpire(@NonNull String key, Object value, Duration duration) {
-        key = redisKeyUtil.getKey(key);
-        super.addSetValueExpire(key, value, duration);
-    }
-
-    public void addSetValueExpire(@NonNull String key, Object value, Duration duration, Object... formats) {
-        key = redisKeyUtil.getKey(key)
-                          .formatted(formats);
-        super.addSetValueExpire(key, value, duration);
-    }
 
     @Override
-    public void addSetValue(@NonNull String key, Object value) {
+    public Long addSetValue(@NonNull String key, Object... value) {
         key = redisKeyUtil.getKey(key);
-        super.addSetValue(key, value);
+        return super.addSetValue(key, value);
     }
 
     public void addSetValue(@NonNull String key, Object value, Object... formats) {
@@ -245,27 +264,32 @@ public class ServiceRedisUtil extends RedisUtil {
         super.addSetValue(key, value);
     }
 
-    @Override
-    public Long getAndDecrease(@NonNull String key, int value) {
-        key = redisKeyUtil.getKey(key);
-        return super.getAndDecrease(key, value);
+    /**
+     * 向指定的键添加多个集合值。
+     * 该方法会调用父类的 {@code addSetValue} 方法实现实际的操作。
+     * <p>
+     * <b>注意，该方法的 key 应为 Redis 中的实际键名</b>
+     *
+     * @param key   Redis 的键名，不能为空。
+     * @param value 可变参数，表示需要添加到集合中的值。
+     */
+    public void addSetValueWithCustomKey(@NonNull String key, Object... value) {
+        super.addSetValue(key, value);
     }
 
-    public Long getAndDecrease(@NonNull String key, int value, Object... formats) {
+    @Override
+    public Set<Object> getSetMembers(@NonNull String key) {
+        key = redisKeyUtil.getKey(key);
+        return super.getSetMembers(key);
+    }
+
+    public Set<Object> getSetMembers(@NonNull String key, Object... formats) {
         key = redisKeyUtil.getKey(key)
                           .formatted(formats);
-        return super.getAndDecrease(key, value);
+        return super.getSetMembers(key);
     }
 
-    @Override
-    public Long getAndIncrease(@NonNull String key, int value) {
-        key = redisKeyUtil.getKey(key);
-        return super.getAndIncrease(key, value);
-    }
+    // endregion
 
-    public Long getAndIncrease(@NonNull String key, int value, Object... formats) {
-        key = redisKeyUtil.getKey(key)
-                          .formatted(formats);
-        return super.getAndIncrease(key, value);
-    }
+
 }

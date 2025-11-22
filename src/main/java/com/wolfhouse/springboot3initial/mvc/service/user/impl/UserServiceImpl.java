@@ -33,6 +33,8 @@ import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
 import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
+import com.wolfhouse.springboot3initial.util.redisutil.service.RedisOssService;
+import com.wolfhouse.springboot3initial.util.redisutil.service.RedisUserService;
 import com.wolfhouse.springboot3initial.util.verifynode.common.PhoneVerifyNode;
 import com.wolfhouse.springboot3initial.util.verifynode.common.ServiceVerifyNode;
 import com.wolfhouse.springboot3initial.util.verifynode.user.UserVerifyNode;
@@ -47,11 +49,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.wolfhouse.springboot3initial.mvc.model.domain.user.table.UserTableDef.USER;
 
@@ -70,6 +75,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final BucketClient avatarOssClient;
     private final OssUploadLogService ossLogService;
     private final ServiceRedisUtil redisUtil;
+    private final RedisUserService redisUserService;
+    private final RedisOssService redisOssService;
 
     // region 初始化
 
@@ -97,7 +104,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UserLocalDto login = getLogin();
         ThrowUtil.throwIfBlank(login,
                                HttpCode.UN_AUTHORIZED.code,
-                               HttpCode.UN_AUTHORIZED.message);
+                               HttpCode.UN_AUTHORIZED.message,
+                               ServiceException.class);
+
+        return login;
+    }
+
+    @Override
+    public User getLoginUser() {
+        UserLocalDto login = getLogin();
+        if (login == null) {
+            return null;
+        }
+        return getById(login.getId());
+    }
+
+    @Override
+    public User getLoginUserOrThrow() {
+        User login = getLoginUser();
+        ThrowUtil.throwIfBlank(login,
+                               HttpCode.UN_AUTHORIZED.code,
+                               HttpCode.UN_AUTHORIZED.message,
+                               ServiceException.class);
         return login;
     }
 
@@ -229,7 +257,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public UserVo update(UserUpdateDto dto) {
         // 1. 获取当前登录用户
         // 未登录则抛出异常
-        UserLocalDto user = getLoginOrThrow();
+        User user = getLoginUserOrThrow();
+        Long userId = user.getId();
+        AtomicBoolean isAvatarUpdate = new AtomicBoolean(false);
+        StringBuffer avatarPath = new StringBuffer();
 
         // 2. 构建更新条件
         // 获取字段
@@ -269,7 +300,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                       new PhoneVerifyNode(phone.orElse(null)))
                   .doVerify();
         UpdateChain<User> chain = new UpdateChain<>(mapper);
-        chain.eq(User::getId, user.getId());
+        chain.eq(User::getId, userId);
         // 用户名
         dto.getUsername()
            .ifPresent(u -> {
@@ -284,13 +315,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 删除头像
             if (a == null) {
                 chain.set(User::getAvatar, null);
+                isAvatarUpdate.set(true);
                 return;
             }
             // 从缓存中读取头像地址
-            String avatarPath = (String) redisUtil.getValueAndDelete(UserRedisConstant.USER_AVATAR, user.getId());
+            String cachedAvatar = (String) redisUtil.getValueAndDelete(UserRedisConstant.USER_AVATAR, user.getId());
+            if (cachedAvatar != null && !cachedAvatar.isBlank()) {
+                avatarPath.append(cachedAvatar);
+            }
+            String avatarPathStr = avatarPath.toString();
             // 头像地址有效，进行更新
-            if (avatarPath != null) {
-                chain.set(User::getAvatar, avatarPath);
+            if (!avatarPathStr.isBlank()) {
+                chain.set(User::getAvatar, avatarPathStr);
+                isAvatarUpdate.set(true);
             }
         });
         // 生日 可以为空
@@ -304,10 +341,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 3. 执行更新
         // 更新失败则抛出异常，回滚
+        // TODO chain.update 报错时，事务未正常回滚
         ThrowUtil.throwOnCondition(!chain.update(),
                                    HttpCode.SQL_ERROR.code,
                                    HttpCode.SQL_ERROR.message,
                                    ServiceException.class);
+
+        // 更新成功，如果头像进行了更新，则执行头像清理
+        if (isAvatarUpdate.get()) {
+            if (redisOssService.addDeletesFromOss(userId,
+                                                  Set.of(avatarOssClient.buildPath(new File(avatarPath.toString()).getName())))) {
+                log.warn("头像更新成功，但执行清理失败: {}", userId);
+            }
+        }
+
         // 4. 返回 Vo
         return getVoById(user.getId());
     }
@@ -379,7 +426,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void uploadAvatar(MultipartFile file) throws ImgValidException {
+    public String uploadAvatar(MultipartFile file) throws ImgValidException {
         // 0. 校验登录信息
         UserLocalDto user = getLoginOrThrow();
         // 1. 校验文件
@@ -428,19 +475,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new ServiceException(HttpCode.OSS_UPLOAD_FAILED);
         }
         // 记录上传日志
-        if (!ossLogService.log(filename, fileValid.size(), filepath)) {
-            log.error("{}: \nname: {}\npath: {}\nsize: {}\nuserId: {}",
+        // oss 的存储位置为 文件夹/文件名
+        String ossPath = avatarOssClient.buildPath(filename);
+        if (!ossLogService.log(filename, fileValid.size(), filepath, ossPath)) {
+            log.error("{}: \nname: {}\npath: {}\nossPath:{}\nsize: {}\nuserId: {}",
                       OssUploadLogConstant.FAIL_TO_LOG,
                       filename,
                       filepath,
+                      ossPath,
                       fileValid.size(),
                       user.getId());
         }
 
-
         // 4. 保存用户 ID  与地址映射
         // 头像缓存保留 15 分钟
         redisUtil.setValueExpire(UserRedisConstant.USER_AVATAR, filepath, Duration.ofMinutes(15), user.getId());
+        // 返回文件名
+        return filename;
     }
 
     // endregion

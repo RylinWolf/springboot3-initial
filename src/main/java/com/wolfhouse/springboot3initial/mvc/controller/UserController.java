@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author mybatis-flex-helper automatic generation
  * @since 1.0
  */
+@Slf4j
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -37,6 +39,8 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final UserApplication userApplication;
+
+    // TODO 用户更新后清除缓存
 
     @PostMapping("/login")
     @Operation(summary = "登录")

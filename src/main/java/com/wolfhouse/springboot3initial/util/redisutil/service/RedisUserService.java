@@ -105,4 +105,11 @@ public class RedisUserService {
         } catch (Exception ignored) {}
         return null;
     }
+
+    public String getAndDeleteAvatarPath(Long userId) {
+        try {
+            return (String) redisUtil.getValueAndDelete(UserRedisConstant.USER_AVATAR, userId);
+        } catch (Exception ignored) {}
+        return null;
+    }
 }

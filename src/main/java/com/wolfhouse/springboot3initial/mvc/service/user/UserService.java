@@ -36,6 +36,20 @@ public interface UserService extends IService<User> {
     UserLocalDto getLoginOrThrow();
 
     /**
+     * 获取当前登录的用户信息。
+     *
+     * @return 返回当前登录的用户对象；如果用户未登录，则返回 null
+     */
+    User getLoginUser();
+
+    /**
+     * 获取当前登录的用户信息。
+     *
+     * @return 返回当前登录的用户对象；如果用户未登录，则抛出异常
+     */
+    User getLoginUserOrThrow();
+
+    /**
      * 验证用户凭证和密码的正确性。
      *
      * @param certificate 用户凭证（如电子邮件、手机号码或用户名），用于唯一标识用户
@@ -90,9 +104,10 @@ public interface UserService extends IService<User> {
      * 上传用户头像。
      *
      * @param file 需要上传的头像文件，文件类型应为支持的图片格式（如 JPEG、PNG 等）
+     * @return 上传后的文件名
      * @throws ImgValidException 图像校验失败异常
      */
-    void uploadAvatar(MultipartFile file) throws ImgValidException;
+    String uploadAvatar(MultipartFile file) throws ImgValidException;
 
     // endregion
 
