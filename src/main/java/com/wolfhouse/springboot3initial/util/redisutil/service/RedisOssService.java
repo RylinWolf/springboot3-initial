@@ -19,26 +19,24 @@ public class RedisOssService {
     private final ServiceRedisUtil redisUtil;
     private final OssUploadLogService ossLogService;
 
-    public Boolean addDeletesFromOss(Long userId, Set<String> except) {
-        Set<String> filePaths = ossLogService.getUndeletedFileOssPath(userId);
+    public Boolean addDuplicateAvatarFromOss(Long userId, Set<String> except) {
+        Set<String> filePaths = ossLogService.getUndeletedAvatarOssPath(userId);
         filePaths.removeAll(except);
-        return this.addDeletes(filePaths);
+        return this.addDuplicateAvatar(filePaths) == filePaths.size();
     }
 
-    public Boolean addDeletes(Set<String> deletes) {
-        log.debug("添加至 Redis Oss 删除列表");
-        Long amount = redisUtil.addSetValue(OssRedisConstant.OSS_DELETE_SET, deletes.toArray());
-        if (amount != deletes.size()) {
-            log.warn("添加至 Redis Oss 删除列表时，有成员未成功添加! {}", deletes);
-            return false;
-        }
-        return true;
+    public Long addDuplicateAvatar(Set<String> avatarPath) {
+        return redisUtil.addSetValue(OssRedisConstant.OSS_DELETE_SET, (Object[]) avatarPath.toArray(new String[0]));
     }
 
-    public Set<String> getDeletes() {
+    public Set<String> getCachedDuplicateAvatar() {
         Set<Object> deletes = redisUtil.getSetMembers(OssRedisConstant.OSS_DELETE_SET);
         return deletes.stream()
                       .map(String::valueOf)
                       .collect(java.util.stream.Collectors.toSet());
+    }
+
+    public void removeAllAvatar(Set<String> deletedObject) {
+        redisUtil.removeSetValue(OssRedisConstant.OSS_DELETE_SET, (Object[]) deletedObject.toArray(new String[0]));
     }
 }

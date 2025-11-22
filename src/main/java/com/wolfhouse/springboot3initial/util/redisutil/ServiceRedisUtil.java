@@ -240,12 +240,12 @@ public class ServiceRedisUtil extends RedisUtil {
     }
 
     @Override
-    public void removeSetValue(@NonNull String key, Object value) {
+    public void removeSetValue(@NonNull String key, Object... value) {
         key = redisKeyUtil.getKey(key);
         super.removeSetValue(key, value);
     }
 
-    public void removeSetValue(@NonNull String key, Object value, Object... formats) {
+    public void removeSetValue(@NonNull String key, Object[] value, Object... formats) {
         key = redisKeyUtil.getKey(key)
                           .formatted(formats);
         super.removeSetValue(key, value);

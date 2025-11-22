@@ -4,13 +4,14 @@ import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
+import com.wolfhouse.springboot3initial.common.enums.oss.FileType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 实体类。
@@ -60,7 +61,7 @@ public class OssUploadLog {
     @Schema(description = "文件 OSS 存储路径")
     @Column(value = "file_oss_path")
     private String fileOssPath;
-    
+
     /**
      * 上传用户
      */
@@ -73,7 +74,14 @@ public class OssUploadLog {
      */
     @Schema(description = "上传时间")
     @Column(value = "upload_time")
-    private Date uploadTime;
+    private LocalDateTime uploadTime;
+
+    /**
+     * 文件业务类型
+     */
+    @Schema(description = "文件业务类型")
+    @Column(value = "file_type")
+    private FileType fileType;
 
     /**
      * 文件删除

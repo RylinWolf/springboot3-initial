@@ -51,14 +51,15 @@ create table if not exists `authentication`
 create table if not exists `oss_upload_log`
 (
     id              bigint primary key comment '日志 ID',
-    `filename`      varchar(255) not null comment '文件名',
-    `file_size`     bigint       not null comment '文件大小',
-    `file_path`     varchar(512) not null comment '文件路径',
-    `file_oss_path` varchar(512) not null comment '文件 OSS 路径',
-    `upload_user`   bigint       not null comment '上传用户',
-    `file_deleted`  tinyint      not null default 0 comment '文件是否删除',
-    `upload_time`   datetime              default current_timestamp comment '上传时间',
+    `filename`      varchar(255) unique not null comment '文件名',
+    `file_size`     bigint              not null comment '文件大小',
+    `file_path`     varchar(512) unique not null comment '文件路径',
+    `file_oss_path` varchar(512) unique not null comment '文件 OSS 路径',
+    `file_type`     varchar(64)         not null comment '文件业务类型',
+    `upload_user`   bigint              not null comment '上传用户',
+    `file_deleted`  tinyint             not null default 0 comment '文件是否删除',
+    `upload_time`   datetime                     default current_timestamp comment '上传时间',
     index user_filename_idx (upload_user, filename) comment '上传用户_文件名称-联合索引',
-    index user_time_idx (upload_user, upload_time) comment '上传用户_上传时间-联合索引',
-    index user_delete_osspath_idx (upload_user, file_deleted, file_oss_path) comment '上传用户_文件是否删除_OSS路径-联合索引'
+    index type_user_idx (file_type, upload_user) comment '文件业务类型_上传用户-联合索引',
+    index time_type_delete_oss (upload_time, file_type, file_deleted, file_oss_path) comment '时间_类型_删除_OSS路径-联合索引'
 )

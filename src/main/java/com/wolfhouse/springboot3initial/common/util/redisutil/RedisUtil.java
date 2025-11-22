@@ -39,7 +39,7 @@ public class RedisUtil {
         return opsForSet.add(key, value);
     }
 
-    public void removeSetValue(@NonNull String key, Object value) {
+    public void removeSetValue(@NonNull String key, Object... value) {
         opsForSet.remove(key, value);
     }
 

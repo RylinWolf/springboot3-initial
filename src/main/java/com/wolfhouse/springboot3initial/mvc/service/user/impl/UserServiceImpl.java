@@ -9,6 +9,7 @@ import com.mybatisflex.core.update.UpdateChain;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import com.wolfhouse.springboot3initial.common.constant.OssUploadLogConstant;
 import com.wolfhouse.springboot3initial.common.constant.UserConstant;
+import com.wolfhouse.springboot3initial.common.enums.oss.FileType;
 import com.wolfhouse.springboot3initial.common.enums.user.GenderEnum;
 import com.wolfhouse.springboot3initial.common.result.HttpCode;
 import com.wolfhouse.springboot3initial.common.util.beanutil.BeanUtil;
@@ -260,8 +261,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = getLoginUserOrThrow();
         Long userId = user.getId();
         AtomicBoolean isAvatarUpdate = new AtomicBoolean(false);
-        StringBuffer avatarPath = new StringBuffer();
-
         // 2. 构建更新条件
         // 获取字段
         JsonNullable<String> username = dto.getUsername();
@@ -271,7 +270,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         JsonNullable<String> personalStatus = dto.getPersonalStatus();
         JsonNullable<String> phone = dto.getPhone();
         JsonNullable<String> email = dto.getEmail();
-
         // 邮箱和用户名若与之前一样，则不修改
         if (user.getUsername()
                 .equals(username.orElse(null))) {
@@ -281,7 +279,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .equals(email.orElse(null))) {
             email = JsonNullable.undefined();
         }
-
         // 校验字段
         VerifyTool.of(
                       // 生日
@@ -299,6 +296,65 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                       // 手机号
                       new PhoneVerifyNode(phone.orElse(null)))
                   .doVerify();
+
+        // 构建更新链
+        UpdateChain<User> chain = buildUserUpdateChain(
+            dto,
+            userId,
+            email,
+            avatar,
+            isAvatarUpdate,
+            birth,
+            gender,
+            phone,
+            personalStatus);
+
+        // 3. 执行更新
+        // 更新失败则抛出异常，回滚
+        // TODO chain.update 报错时，事务未正常回滚
+        // 默认状态为已更新
+        boolean isErrored = false;
+        try {
+            chain.update();
+        } catch (Exception ignored) {
+            isErrored = true;
+        }
+        // 若代码报错，则手动抛出异常
+        ThrowUtil.throwOnCondition(isErrored,
+                                   HttpCode.SQL_ERROR.code,
+                                   HttpCode.SQL_ERROR.message,
+                                   ServiceException.class);
+
+        // 4. 删除所有当前使用的头像后续的记录游标（未考虑并发问题）
+        // 获取使用头像
+        UserVo vo = getVoById(user.getId());
+        String avatarInuse = vo.getAvatar();
+        // 删除指定日志后的数据
+        Set<String> afterByPath = ossLogService.getAvatarOssPathAfterByPath(avatarInuse);
+        redisOssService.addDuplicateAvatar(afterByPath);
+
+        // 如果头像进行了更新，则执行历史头像清理: 正常情况下，只要头像更新，则使用的是最新的文件
+        if (isAvatarUpdate.get()) {
+            if (redisOssService.addDuplicateAvatarFromOss(userId,
+                                                          Set.of(avatarOssClient.buildPath(new File(avatarInuse).getName())))) {
+                log.warn("头像更新成功，但执行清理失败: {}", userId);
+            }
+        }
+
+        // 5. 返回 Vo
+        return vo;
+    }
+
+    /** 构建用户更新链 */
+    private UpdateChain<User> buildUserUpdateChain(UserUpdateDto dto,
+                                                   Long userId,
+                                                   JsonNullable<String> email,
+                                                   JsonNullable<String> avatar,
+                                                   AtomicBoolean isAvatarUpdate,
+                                                   JsonNullable<LocalDate> birth,
+                                                   JsonNullable<GenderEnum> gender,
+                                                   JsonNullable<String> phone,
+                                                   JsonNullable<String> personalStatus) {
         UpdateChain<User> chain = new UpdateChain<>(mapper);
         chain.eq(User::getId, userId);
         // 用户名
@@ -310,26 +366,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
            });
         // 邮箱
         email.ifPresent(e -> chain.set(User::getEmail, e));
-        // 头像 可以为空
-        avatar.ifPresent(a -> {
-            // 删除头像
-            if (a == null) {
-                chain.set(User::getAvatar, null);
+        // 头像 反转判断逻辑，先判断有无缓存
+        // 从缓存中读取头像地址
+        String cachedAvatar = redisUserService.getAndDeleteAvatarPath(userId);
+        // 若上传过头像则执行更新检查
+        if (cachedAvatar != null && !cachedAvatar.isBlank()) {
+            avatar.ifPresent(a -> {
+                // 删除头像
+                if (a == null) {
+                    chain.set(User::getAvatar, null);
+                    isAvatarUpdate.set(true);
+                    return;
+                }
+                // 头像地址有效，进行更新
+                chain.set(User::getAvatar, cachedAvatar);
                 isAvatarUpdate.set(true);
-                return;
-            }
-            // 从缓存中读取头像地址
-            String cachedAvatar = (String) redisUtil.getValueAndDelete(UserRedisConstant.USER_AVATAR, user.getId());
-            if (cachedAvatar != null && !cachedAvatar.isBlank()) {
-                avatarPath.append(cachedAvatar);
-            }
-            String avatarPathStr = avatarPath.toString();
-            // 头像地址有效，进行更新
-            if (!avatarPathStr.isBlank()) {
-                chain.set(User::getAvatar, avatarPathStr);
-                isAvatarUpdate.set(true);
-            }
-        });
+            });
+        }
+
         // 生日 可以为空
         birth.ifPresent(b -> chain.set(User::getBirth, b, true));
         // 性别 可以为空
@@ -338,25 +392,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         phone.ifPresent(p -> chain.set(User::getPhone, p, true));
         // 个性签名 可以为空
         personalStatus.ifPresent(s -> chain.set(User::getPersonalStatus, s, true));
-
-        // 3. 执行更新
-        // 更新失败则抛出异常，回滚
-        // TODO chain.update 报错时，事务未正常回滚
-        ThrowUtil.throwOnCondition(!chain.update(),
-                                   HttpCode.SQL_ERROR.code,
-                                   HttpCode.SQL_ERROR.message,
-                                   ServiceException.class);
-
-        // 更新成功，如果头像进行了更新，则执行头像清理
-        if (isAvatarUpdate.get()) {
-            if (redisOssService.addDeletesFromOss(userId,
-                                                  Set.of(avatarOssClient.buildPath(new File(avatarPath.toString()).getName())))) {
-                log.warn("头像更新成功，但执行清理失败: {}", userId);
-            }
-        }
-
-        // 4. 返回 Vo
-        return getVoById(user.getId());
+        return chain;
     }
 
     @Override
@@ -477,14 +513,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 记录上传日志
         // oss 的存储位置为 文件夹/文件名
         String ossPath = avatarOssClient.buildPath(filename);
-        if (!ossLogService.log(filename, fileValid.size(), filepath, ossPath)) {
-            log.error("{}: \nname: {}\npath: {}\nossPath:{}\nsize: {}\nuserId: {}",
+        if (!ossLogService.log(filename, fileValid.size(), filepath, ossPath, FileType.AVATAR)) {
+            log.error("{}: \nname: {}\npath: {}\nossPath:{}\nsize: {}\nuserId: {}\nfileType: {}",
                       OssUploadLogConstant.FAIL_TO_LOG,
                       filename,
                       filepath,
                       ossPath,
                       fileValid.size(),
-                      user.getId());
+                      user.getId(),
+                      FileType.AVATAR.desc);
         }
 
         // 4. 保存用户 ID  与地址映射

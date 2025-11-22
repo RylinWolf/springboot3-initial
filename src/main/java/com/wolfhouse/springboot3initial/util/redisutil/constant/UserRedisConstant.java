@@ -34,4 +34,5 @@ public class UserRedisConstant {
     @Except
     public static final Duration EXIST_DURATION = Duration.ofMinutes(10);
     public static final Duration VO_DURATION = Duration.ofMinutes(3 * 24 * 60);
+    public static final Duration AVATAR_DURATION = Duration.ofMinutes(60);
 }
