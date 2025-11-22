@@ -89,9 +89,6 @@ public class UserTask {
         }
         log.info("[清除缓存的重复头像] 共清除记录: {} 条，详情开启 debug 查看", deletedObject.size());
         log.debug("[清除缓存的重复头像] 清除记录详情: {}", deletedObject);
-
-        // TODO 存在删除了错误的头像的问题（保留了未使用的，删除了已使用的）
-        // TODO 推测：第一个定时任务导致的。用户服务基于游标的业务无误。
     }
 
 }

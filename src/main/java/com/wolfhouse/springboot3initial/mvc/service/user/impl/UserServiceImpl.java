@@ -32,6 +32,7 @@ import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.OssUploadLogService;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
 import com.wolfhouse.springboot3initial.security.SecurityContextUtil;
+import com.wolfhouse.springboot3initial.task.UserTask;
 import com.wolfhouse.springboot3initial.util.redisutil.ServiceRedisUtil;
 import com.wolfhouse.springboot3initial.util.redisutil.constant.UserRedisConstant;
 import com.wolfhouse.springboot3initial.util.redisutil.service.RedisOssService;
@@ -78,6 +79,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private final ServiceRedisUtil redisUtil;
     private final RedisUserService redisUserService;
     private final RedisOssService redisOssService;
+    private final UserTask task;
 
     // region 初始化
 
@@ -332,7 +334,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 删除指定日志后的数据
         Set<String> afterByPath = ossLogService.getAvatarOssPathAfterByPath(avatarInuse);
         redisOssService.addDuplicateAvatar(afterByPath);
-
+        // 直接从缓存中删除，避免后续定时任务可能引发的问题
+        task.doCleanCachedDuplicateAvatar();
+        
         // 如果头像进行了更新，则执行历史头像清理: 正常情况下，只要头像更新，则使用的是最新的文件
         if (isAvatarUpdate.get()) {
             if (redisOssService.addDuplicateAvatarFromOss(userId,
