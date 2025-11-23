@@ -82,6 +82,10 @@ public class UserTask {
                 throw new ServiceException(e.getMessage());
             }
         });
+        if (deletedObject.isEmpty()) {
+            log.debug("[清除缓存的重复头像] 没有要清除的对象");
+            return;
+        }
         redisOssService.removeAllAvatar(deletedObject);
         Set<String> shouldNull = redisOssService.getCachedDuplicateAvatar();
         if (shouldNull != null && !shouldNull.isEmpty()) {

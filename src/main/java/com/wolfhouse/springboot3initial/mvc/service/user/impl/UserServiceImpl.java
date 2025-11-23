@@ -313,7 +313,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 3. 执行更新
         // 更新失败则抛出异常，回滚
-        // TODO chain.update 报错时，事务未正常回滚
         // 默认状态为已更新
         boolean isErrored = false;
         try {
@@ -333,7 +332,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String avatarInuse = vo.getAvatar();
         // 删除指定日志后的数据
         Set<String> afterByPath = ossLogService.getAvatarOssPathAfterByPath(avatarInuse);
-        redisOssService.addDuplicateAvatar(afterByPath);
+        if (afterByPath != null && !afterByPath.isEmpty()) {
+            redisOssService.addDuplicateAvatar(afterByPath);
+        }
         // 直接从缓存中删除，避免后续定时任务可能引发的问题
         task.doCleanCachedDuplicateAvatar();
 
