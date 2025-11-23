@@ -9,6 +9,7 @@ import com.wolfhouse.springboot3initial.mvc.application.UserApplication;
 import com.wolfhouse.springboot3initial.mvc.model.dto.user.*;
 import com.wolfhouse.springboot3initial.mvc.model.vo.UserVo;
 import com.wolfhouse.springboot3initial.mvc.service.user.UserService;
+import com.wolfhouse.springboot3initial.util.redisutil.service.RedisUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +40,7 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final UserApplication userApplication;
+    private final RedisUserService redisUserService;
 
     // TODO 用户更新后清除缓存
 
@@ -126,6 +128,8 @@ public class UserController {
             UserLocalDto localDto = BeanUtil.copyProperties(vo, UserLocalDto.class);
             request.getSession()
                    .setAttribute(UserConstant.LOGIN_USER_SESSION_KEY, localDto);
+            // 清空用户缓存
+            redisUserService.clearForUpdate(vo.getId());
         }
         return HttpResult.failedIfBlank(vo);
     }
