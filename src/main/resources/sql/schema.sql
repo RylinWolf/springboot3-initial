@@ -59,7 +59,7 @@ create table if not exists `oss_upload_log`
     `upload_user`   bigint              not null comment '上传用户',
     `file_deleted`  tinyint             not null default 0 comment '文件是否删除',
     `upload_time`   datetime                     default current_timestamp comment '上传时间',
-    index user_filename_idx (upload_user, filename) comment '上传用户_文件名称-联合索引',
+    index id_user_name_idx (id, upload_user, filename) comment '上传用户_文件名称-联合索引',
     index type_user_idx (file_type, upload_user) comment '文件业务类型_上传用户-联合索引',
     index time_type_delete_oss (upload_time, file_type, file_deleted, file_oss_path) comment '时间_类型_删除_OSS路径-联合索引'
 )

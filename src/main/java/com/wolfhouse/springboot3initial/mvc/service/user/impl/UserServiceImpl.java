@@ -336,7 +336,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         redisOssService.addDuplicateAvatar(afterByPath);
         // 直接从缓存中删除，避免后续定时任务可能引发的问题
         task.doCleanCachedDuplicateAvatar();
-        
+
         // 如果头像进行了更新，则执行历史头像清理: 正常情况下，只要头像更新，则使用的是最新的文件
         if (isAvatarUpdate.get()) {
             if (redisOssService.addDuplicateAvatarFromOss(userId,
@@ -486,7 +486,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         ByteArrayInputStream imgIns;
         // 3. 上传文件
         try (var ins = file.getInputStream()) {
-            // TODO Redis 获取已上传图片路径，判断是否有已经上传但没有使用的头像指纹，有则删除
             // 3.1 压缩图片大小
             // 构建压缩器
             ImgCompressor compressor = ImgCompressor.of(ins);
