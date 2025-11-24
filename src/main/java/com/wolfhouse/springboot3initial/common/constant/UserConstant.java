@@ -26,10 +26,17 @@ public class UserConstant {
     public static final String AVATAR_VALID_FAILED = "头像验证失败";
 
     // region 头像常量
-    /** 触发压缩阈值的图片大小 0.6 MB */
-    public static final long AVATAR_COMPRESS_SIZE = (long) (0.6 * 1024 * 1024);
-    /** 压缩质量 0.7 */
-    public static final float AVATAR_COMPRESS_QUALITY = 0.7f;
+    /** 分阶段压缩，如大于 0.8MB 则按照 0.73 系数压缩 */
+    public static final Long[] AVATAR_FILE_SIZE_LEVEL = {(long) (0.8 * 1024 * 1024),
+                                                         (long) (0.65 * 1024 * 1024),
+                                                         (long) (0.5 * 1024 * 1024),
+                                                         (long) (0.4 * 1024 * 1024),
+                                                         (long) (0.3 * 1024 * 1024),
+                                                         (long) (0.2 * 1024 * 1024),
+                                                         (long) (0.15 * 1024 * 1024),
+                                                         (long) (0.1 * 1024 * 1024)};
+    public static final Float[] AVATAR_FILE_COMPRESS_LEVEL = {0.73f, 0.74f, 0.76f, 0.78f, 0.81f, 0.85f, 0.95f};
+
     /** 最大宽度 */
     public static final int AVATAR_MAX_WIDTH = 1024;
     /** 最大高度 */

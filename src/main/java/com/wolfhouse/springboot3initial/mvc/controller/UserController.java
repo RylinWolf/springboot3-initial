@@ -41,9 +41,7 @@ public class UserController {
     private final UserService userService;
     private final UserApplication userApplication;
     private final RedisUserService redisUserService;
-
-    // TODO 用户更新后清除缓存
-
+    
     @PostMapping("/login")
     @Operation(summary = "登录")
     public HttpResult<UserVo> login(@RequestBody @Valid UserLoginDto dto,

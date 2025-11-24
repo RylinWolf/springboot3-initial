@@ -490,16 +490,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 3.1 压缩图片大小
             // 构建压缩器
             ImgCompressor compressor = ImgCompressor.of(ins);
-            // 判断是否需要压缩质量
-            if (fileValid.size() > UserConstant.AVATAR_COMPRESS_SIZE) {
-                compressor.quality(UserConstant.AVATAR_COMPRESS_QUALITY);
+            // 不同图片大小使用不同压缩比例
+            Long fileSize = fileValid.size();
+            // 对应文件大小与压缩系数
+            for (int i = 0; i < UserConstant.AVATAR_FILE_SIZE_LEVEL.length; i++) {
+                if (fileSize >= UserConstant.AVATAR_FILE_SIZE_LEVEL[i]) {
+                    compressor.quality(UserConstant.AVATAR_FILE_COMPRESS_LEVEL[i]);
+                    break;
+                }
             }
             // 压缩宽高
             compressor.scale(UserConstant.AVATAR_MAX_WIDTH, UserConstant.AVATAR_MAX_HEIGHT);
             // 转换格式
             compressor.format(UserConstant.AVATAR_FORMAT);
             // 执行压缩，获取字节并转为字节流
-            // TODO 不同图片大小使用不同压缩比例
             imgIns = new ByteArrayInputStream(compressor.doCompress()
                                                         .toByteArray());
 
