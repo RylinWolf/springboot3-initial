@@ -28,6 +28,25 @@ public class UserTask {
     public final RedisOssService redisOssService;
     public final BucketClient bucketClient;
 
+    /**
+     * 定时任务方法：扫描 OSS 表，获取重复上传的用户头像路径并缓存到 Redis 中。
+     * <p>
+     * 方法每四天凌晨 3:30 执行一次（基于 @Scheduled 的 cron 表达式）。
+     * <p>
+     * 功能概要：
+     * 1. 使用服务层方法获取重复上传的用户头像路径集合（不包含最近一次上传的记录）。
+     * 2. 将获取到的路径集添加到 Redis 缓存的删除列表中。
+     * 3. 验证添加至 Redis 缓存的路径数量与扫描的路径数量是否一致，并记录日志。
+     * <p>
+     * 日志输出：
+     * - 扫描开始时输出信息日志。
+     * - 如果缓存的数量与扫描的数量不一致，输出警告日志。
+     * - 扫描完成后输出调试日志。
+     * <p>
+     * 注意事项：
+     * - 如果 Redis 操作或路径获取发生异常，日志中会记录详细信息以便排查问题。
+     * - 任务依赖的 ossUploadLogService 和 redisOssService 提供了相应的路径查询和 Redis 操作逻辑。
+     */
     @Scheduled(cron = "0 30 3 */4 * *")
     public void fetchDuplicateAvatar() {
         log.info("正在扫描 OSS 表，缓存用户头像重复上传列表...");
@@ -41,6 +60,31 @@ public class UserTask {
         log.debug("用户头像重新上传列表扫描完毕");
     }
 
+    /**
+     * 定时任务方法：清理缓存中的重复头像记录。
+     * <p>
+     * 方法每两天凌晨 4:30 执行一次（基于 @Scheduled 的 cron 表达式）。
+     * <p>
+     * 功能概要：
+     * 1. 从 Redis 缓存中获取重复头像记录集合。
+     * 2. 遍历重复头像路径，验证其是否仍然存在于 OSS 存储中：
+     * - 若文件不存在，则记录日志并标记为已清除。
+     * - 若文件存在，则调用 OSS 客户端执行删除操作，并更新相关日志。
+     * 3. 通过线程并发执行清理操作，并避免主线程被阻塞。
+     * 4. 删除完成后，清理缓存中已删除的路径。
+     * 5. 验证缓存是否已完全清空，若仍有数据残留则记录警告日志。
+     * 6. 输出任务执行过程中的操作详情及结果日志。
+     * <p>
+     * 日志输出：
+     * - 任务启动及清理操作开始时输出信息日志。
+     * - 若 OSS 文件不存在，或删除相关日志不成功，则输出警告日志。
+     * - 清理完成后输出处理条数及详细记录的调试日志。
+     * <p>
+     * 注意事项：
+     * - 使用并发线程提高任务执行效率，但需确保主线程等待线程任务完成后才能终止。
+     * - 异常处理时将抛出自定义的 ServiceException。
+     * - 操作过程中依赖的服务与组件包括 redisOssService、bucketClient 和 ossUploadLogService。
+     */
     @Scheduled(cron = "0 30 4 */2 * *")
     public void doCleanCachedDuplicateAvatar() {
         log.info("正在执行清除已缓存的重复头像...");
